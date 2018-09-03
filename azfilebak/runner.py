@@ -39,6 +39,7 @@ class Runner:
         commands.add_argument("-l",  "--list-backups", help="Lists all backups in Azure storage", action="store_true")
         commands.add_argument("-p",  "--prune-old-backups", help="Removes old backups from Azure storage ('--prune-old-backups 30d' removes files older 30 days)")
         commands.add_argument("-x",  "--show-configuration", help="Shows the VM's configuration values", action="store_true")
+        commands.add_argument("-u",  "--unit-tests", help="Run unit tests", action="store_true")
 
         options = parser.add_argument_group("options")
 
@@ -173,12 +174,6 @@ class Runner:
         elif args.unit_tests:
             Runner.run_unit_tests()
         elif args.show_configuration:
-            # print(backup_agent.send_notification(
-            #     url='https://postman-echo.com/post',
-            #     aseservername="az2-server", db_name="AZ2", is_full=True, 
-            #     start_timestamp="20180106_120000", end_timestamp="20180106_120501", 
-            #     success=True, data_in_MB=782.1, error_msg="All went well"
-            # ))
             print(backup_agent.show_configuration(output_dir=output_dir))
         else:
             parser.print_help()
