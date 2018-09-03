@@ -1,0 +1,11 @@
+# Some comment
+
+local_temp_directory:          /tmp
+sap.ase.version:               16_0
+sap.SID:                       AZ3
+sap.CID:                       AZ3
+notification_command:          /usr/sbin/ticmcmc --stdin
+# database_password_generator: /sybase/JLD/dba/bin/dbsp Supersecret123
+database_password_generator:   /usr/bin/echo "Test123.-"
+azure.storage.account_name:    sadjfksjlahfkj
+azure.storage.container_name:  immutab

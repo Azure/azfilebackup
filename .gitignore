@@ -1,0 +1,8 @@
+/scripts/
+/.vscode/
+/backup.log
+/*.cdmp
+/config.txt
+/asebackupcli/*.pyc
+/*.log
+/asebackupcli.egg-info

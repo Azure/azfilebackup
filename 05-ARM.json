@@ -1,0 +1,23 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"resources": [
+		{
+			"type": "Microsoft.Compute/virtualMachines",
+			"tags": { 
+				"db_backup_interval_min": "1d",
+				"db_backup_interval_max": "3d",
+				"log_backup_interval_min": "10m",
+				"db_backup_window_1": "111111 111000 000000 011111",
+				"db_backup_window_2": "111111 111000 000000 011111",
+				"db_backup_window_3": "111111 111000 000000 011111",
+				"db_backup_window_4": "111111 111000 000000 011111",
+				"db_backup_window_5": "111111 111000 000000 011111",
+				"db_backup_window_6": "111111 111111 111111 111111",
+				"db_backup_window_7": "111111 111111 111111 111111"
+			}
+		}
+	]
+}
+
+
