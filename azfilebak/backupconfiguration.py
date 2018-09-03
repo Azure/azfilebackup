@@ -41,7 +41,11 @@ class BackupConfiguration:
             "fs_backup_interval_min": lambda: ScheduleParser.parse_timedelta(self.instance_metadata_tag_value("fs_backup_interval_min")),
             "fs_backup_interval_max": lambda: ScheduleParser.parse_timedelta(self.instance_metadata_tag_value("fs_backup_interval_max")),
 
-            "backup.businesshours": lambda: BusinessHours(self.instance_metadata.get_tags())
+            #
+            # Even though we read the file system backup business hours, we use the db_ prefix instead of fs_ prefix, 
+            # because number of Azure Tags is limited. 
+            #
+            "backup.businesshours": lambda: BusinessHours(self.instance_metadata.get_tags(), prefix="db_backup_window")
         }
     
     def cfg_file_value(self, name):
