@@ -1,4 +1,4 @@
-# coding=utf-8
+    # coding=utf-8
 
 from azure.storage.blob import BlockBlobService
 from msrestazure.azure_active_directory import MSIAuthentication
@@ -38,9 +38,8 @@ class BackupConfiguration:
             "resource_group_name": lambda: self.instance_metadata.resource_group_name,
             "location": lambda: self.instance_metadata.location,
 
-            "db_backup_interval_min": lambda: ScheduleParser.parse_timedelta(self.instance_metadata_tag_value("db_backup_interval_min")),
-            "db_backup_interval_max": lambda: ScheduleParser.parse_timedelta(self.instance_metadata_tag_value("db_backup_interval_max")),
-            "log_backup_interval_min": lambda: ScheduleParser.parse_timedelta(self.instance_metadata_tag_value("log_backup_interval_min")),
+            "fs_backup_interval_min": lambda: ScheduleParser.parse_timedelta(self.instance_metadata_tag_value("fs_backup_interval_min")),
+            "fs_backup_interval_max": lambda: ScheduleParser.parse_timedelta(self.instance_metadata_tag_value("fs_backup_interval_max")),
 
             "backup.businesshours": lambda: BusinessHours(self.instance_metadata.get_tags())
         }
@@ -57,17 +56,15 @@ class BackupConfiguration:
         except Exception:
             raise(BackupException("Cannot read value {} from VM's tag configuration".format(name)))
 
-
     def get_value(self, key): return self.data[key]()
     def get_vm_name(self): return self.get_value("vm_name")
     def get_subscription_id(self): return self.get_value("subscription_id")
     def get_resource_group_name(self): return self.get_value("resource_group_name")
     def get_location(self): return self.get_value("location")
 
-    def get_commandline(self): return self.get_value("commandline")
-    def get_db_backup_interval_min(self): return self.get_value("db_backup_interval_min")
-    def get_db_backup_interval_max(self): return self.get_value("db_backup_interval_max")
-    def get_log_backup_interval_min(self): return self.get_value("log_backup_interval_min")
+    def get_commandline(self, configuration_name): return self.cfg_file_value("commandline.{}".format(configuration_name))
+    def get_fs_backup_interval_min(self): return self.get_value("fs_backup_interval_min")
+    def get_fs_backup_interval_max(self): return self.get_value("fs_backup_interval_max")
     def get_business_hours(self): return self.get_value("backup.businesshours")
     def get_standard_local_directory(self): return self.get_value("local_temp_directory")
 

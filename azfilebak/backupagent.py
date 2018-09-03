@@ -13,6 +13,7 @@ import time
 from .funcmodule import printe, out, log_stdout_stderr
 from .naming import Naming
 from .timing import Timing
+from .executableconnector import ExecutableConnector
 from .backupexception import BackupException
 from .streamingthread import StreamingThread
 
@@ -22,7 +23,7 @@ class BackupAgent:
     """
     def __init__(self, backup_configuration):
         self.backup_configuration = backup_configuration
-        self.database_connector = DatabaseConnector(self.backup_configuration)
+        self.executable_connector = ExecutableConnector(self.backup_configuration)
 
     def existing_backups_for_db(self, dbname, is_full):
         existing_blobs_dict = dict()
@@ -174,7 +175,7 @@ class BackupAgent:
         return result
 
     def backup(self, is_full, databases, output_dir, force, skip_upload, use_streaming):
-        databases_to_backup = self.database_connector.determine_databases(user_selected_databases=databases, is_full=is_full)
+        databases_to_backup = self.executable_connector.determine_databases(user_selected_databases=databases, is_full=is_full)
         skip_dbs = self.backup_configuration.get_databases_to_skip()
         databases_to_backup = filter(lambda db: not (db in skip_dbs), databases_to_backup)
 
@@ -234,7 +235,7 @@ class BackupAgent:
             stripe_count=stripe_count, output_dir=output_dir, container_name=temp_container_name)
         logging.debug("Start streaming backup SQL call")
         try:
-            stdout, stderr, returncode = self.database_connector.create_backup_streaming(
+            stdout, stderr, returncode = self.executable_connectorector.create_backup_streaming(
                 dbname=dbname, is_full=is_full, stripe_count=stripe_count, 
                 output_dir=output_dir)
         except BackupException:
@@ -277,7 +278,7 @@ class BackupAgent:
         return (stdout, stderr, returncode, end_timestamp)
 
     def file_backup_single_db(self, dbname, is_full, start_timestamp, stripe_count, output_dir):
-        stdout, stderr, returncode = self.database_connector.create_backup(
+        stdout, stderr, returncode = self.executable_connector.create_backup(
             dbname=dbname, is_full=is_full, start_timestamp=start_timestamp,
             stripe_count=stripe_count, output_dir=output_dir)
         end_timestamp = Timing.now_localtime()
@@ -290,7 +291,7 @@ class BackupAgent:
             out("Skipping backup of database {}".format(dbname))
             return
 
-        stripe_count = self.database_connector.determine_database_backup_stripe_count(dbname=dbname, is_full=is_full)
+        stripe_count = self.executable_connectorector.determine_database_backup_stripe_count(dbname=dbname, is_full=is_full)
 
         backup_exception=None
         try:
@@ -337,7 +338,7 @@ class BackupAgent:
             logging.fatal(message)
             raise BackupException(message)
 
-        ddl_content = self.database_connector.create_ddlgen(dbname=dbname)
+        ddl_content = self.executable_connectorector.create_ddlgen(dbname=dbname)
         ddlgen_file_name=Naming.construct_ddlgen_name(dbname=dbname, start_timestamp=start_timestamp)
         self.backup_configuration.storage_client.create_blob_from_text(
             container_name=self.backup_configuration.azure_storage_container_name,
@@ -454,7 +455,7 @@ class BackupAgent:
 
     def restore(self, restore_point, output_dir, databases):
         print("Retriving point-in-time restore {} for databases {}".format(restore_point, str(databases)))
-        databases = self.database_connector.determine_databases(user_selected_databases=databases, is_full=True)
+        databases = self.executable_connectorector.determine_databases(user_selected_databases=databases, is_full=True)
         skip_dbs = self.backup_configuration.get_databases_to_skip()
         databases = filter(lambda db: not (db in skip_dbs), databases)
         for dbname in databases:
@@ -527,16 +528,11 @@ class BackupAgent:
             "azure.resource_group_name:          {}".format(self.backup_configuration.get_resource_group_name()),
             "azure.subscription_id:              {}".format(self.backup_configuration.get_subscription_id()),
             "",
-            "sap.SID:                            {}".format(self.backup_configuration.get_SID()),
-            "sap.CID:                            {}".format(self.backup_configuration.get_CID()),
-            "ASE version:                        {}".format(self.backup_configuration.get_ase_version()),
-            "ASE dir:                            {}".format(DatabaseConnector(self.backup_configuration).get_ase_base_directory()),
             "Output dir:                         {}".format(output_dir),
             "",
             "skipped databases:                  {}".format(self.backup_configuration.get_databases_to_skip()),
-            "db_backup_interval_min:             {}".format(self.backup_configuration.get_db_backup_interval_min()),
-            "db_backup_interval_max:             {}".format(self.backup_configuration.get_db_backup_interval_max()),
-            "log_backup_interval_min:            {}".format(self.backup_configuration.get_log_backup_interval_min())
+            "fs_backup_interval_min:             {}".format(self.backup_configuration.get_fs_backup_interval_min()),
+            "fs_backup_interval_max:             {}".format(self.backup_configuration.get_fs_backup_interval_max()),
         ] + hours + [
             "",
             "azure_storage_container_name:       {}".format(self.backup_configuration.azure_storage_container_name),
