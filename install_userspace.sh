@@ -1,10 +1,10 @@
 #!/bin/bash
 
-envname=backup_files
+envname=azfilebak
 
 pip install --user virtualenv
 ~/.local/bin/virtualenv --python=python2.7 ~/${envname}
 source ~/${envname}/bin/activate
-pip install git+https://github.com/chgeuer/python_backup_files.git#egg=azfilebak
+pip install git+https://github.com/chgeuer/azfilebak.git#egg=azfilebak
 
-ln -s ~/${envname}/bin/python_backup_files ~/bin
+ln -s ~/${envname}/bin/azfilebak ~/bin

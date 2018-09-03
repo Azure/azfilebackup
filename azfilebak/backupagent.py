@@ -13,7 +13,6 @@ import time
 from .funcmodule import printe, out, log_stdout_stderr
 from .naming import Naming
 from .timing import Timing
-from .databaseconnector import DatabaseConnector
 from .backupexception import BackupException
 from .streamingthread import StreamingThread
 
