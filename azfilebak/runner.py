@@ -34,7 +34,7 @@ class Runner:
         requiredNamed.add_argument("-c",  "--config", help="the path to the config file")
 
         commands = parser.add_argument_group("commands")
-        commands.add_argument("-f",  "--full-backup", help="Perform full backup", action="store_true")
+        commands.add_argument("-f",  "--full-backup", help="Perform backup for configuration")
         commands.add_argument("-r",  "--restore", help="Perform restore for date")
         commands.add_argument("-l",  "--list-backups", help="Lists all backups in Azure storage", action="store_true")
         commands.add_argument("-p",  "--prune-old-backups", help="Removes old backups from Azure storage ('--prune-old-backups 30d' removes files older 30 days)")
@@ -143,9 +143,7 @@ class Runner:
         backup_configuration = BackupConfiguration(config_file)
         backup_agent = BackupAgent(backup_configuration)
         output_dir = Runner.get_output_dir(args)
-        databases = Runner.get_databases(args)
 
-        use_streaming=args.stream_upload
         skip_upload=args.skip_upload
         force=args.force
 
@@ -156,7 +154,7 @@ class Runner:
             try:
                 #is_full, databases, output_dir, force, skip_upload, use_streaming
                 with pid.PidFile(pidname='files-backup-full', piddir=".") as _p:
-                    backup_agent.backup(is_full=True, databases=databases, output_dir=output_dir, force=force, skip_upload=skip_upload, use_streaming=use_streaming)
+                    backup_agent.backup(databases=databases, output_dir=output_dir, force=force, skip_upload=skip_upload, backup_configuration=args.full_backup)
             except pid.PidFileAlreadyLockedError:
                 logging.warn("Skip full backup, already running")
         elif args.restore:

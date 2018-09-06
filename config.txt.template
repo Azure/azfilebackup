@@ -1,6 +1,0 @@
-# Some comment
-
-local_temp_directory:          /tmp
-notification_command:          /usr/sbin/ticmcmc --stdin
-azure.storage.account_name:    sadjfksjlahfkj
-azure.storage.container_name:  immutab

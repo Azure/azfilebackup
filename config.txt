@@ -1,0 +1,13 @@
+
+azure.storage.account_name:    sadjfksjlahfkj
+azure.storage.container_name:  immutab
+local_temp_directory:          /tmp
+notification_command:          /usr/sbin/ticmcmc --stdin
+
+commandline.tmp_dir:           tar cvfz - /tmp
+commandline.everything:        tar cvfz - / --exclude=/dev --exclude=/proc --exclude=/run --exclude=/sys
+commandline.someecho:          echo "hallo"
+
+# 
+# $ azbackup --config-file /etc/azfileback --configurion-key==everything
+# 
