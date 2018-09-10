@@ -17,4 +17,7 @@ setup(
         'azure-storage-common>=1.3.0',
         'azure-storage-blob>=1.3.0',
         'msrestazure>=0.4.14'
+    ],
+    tests_require=[
+        'mock'
     ])
