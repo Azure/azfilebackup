@@ -5,7 +5,6 @@ class TestBackupConfigurationFile(unittest.TestCase):
 
     def test_read_key_value_file(self):
         values = backupconfigurationfile.BackupConfigurationFile.read_key_value_file(filename="config.txt.template")
-        print(values)
         self.assertEqual(values['local_temp_directory'], '/tmp')
         self.assertEqual(values['azure.storage.account_name'], 'sadjfksjlahfkj')
         self.assertEqual(values['azure.storage.container_name'], 'immutab')
