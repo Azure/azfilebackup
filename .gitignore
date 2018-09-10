@@ -3,6 +3,6 @@
 /backup.log
 /*.cdmp
 /config.txt
-/azfilebak/*.pyc
+*.pyc
 /*.log
 /asebackupcli.egg-info
