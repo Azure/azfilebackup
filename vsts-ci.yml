@@ -12,4 +12,4 @@ steps:
     versionSpec: '2.7'
     architecture: 'x64'
 
-- script: make test
+- script: python setup.py test
