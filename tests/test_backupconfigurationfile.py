@@ -8,14 +8,14 @@ class TestBackupConfigurationFile(unittest.TestCase):
     def test_read_key_value_file(self):
         """test read_key_value_file"""
         values = backupconfigurationfile.BackupConfigurationFile.read_key_value_file(
-            filename="config.txt.template")
+            filename="config.txt")
         self.assertEqual(values['local_temp_directory'], '/tmp')
         self.assertEqual(values['azure.storage.account_name'], 'sadjfksjlahfkj')
         self.assertEqual(values['azure.storage.container_name'], 'immutab')
 
     def test_get_value(self):
         """test get_value"""
-        config = backupconfigurationfile.BackupConfigurationFile(filename="config.txt.template")
+        config = backupconfigurationfile.BackupConfigurationFile(filename="config.txt")
         self.assertEqual(config.get_value('local_temp_directory'), '/tmp')
         self.assertEqual(config.get_value('azure.storage.account_name'), 'sadjfksjlahfkj')
         self.assertEqual(config.get_value('azure.storage.container_name'), 'immutab')
