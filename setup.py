@@ -14,7 +14,7 @@ setup(
     },
     install_requires=[
         'pid>=2.2.0',
-        'azure-storage-common>=1.2.0rc0,<1.3.0',
-        'azure-storage-blob>=1.1.0rc0,<1.3.0',
+        'azure-storage-common>=1.3.0',
+        'azure-storage-blob>=1.3.0',
         'msrestazure>=0.4.14'
     ])
