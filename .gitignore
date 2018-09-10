@@ -5,4 +5,3 @@
 /config.txt
 *.pyc
 /*.log
-/asebackupcli.egg-info

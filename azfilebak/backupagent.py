@@ -235,7 +235,7 @@ class BackupAgent:
             stripe_count=stripe_count, output_dir=output_dir, container_name=temp_container_name)
         logging.debug("Start streaming backup SQL call")
         try:
-            stdout, stderr, returncode = self.executable_connectorector.create_backup_streaming(
+            stdout, stderr, returncode = self.executable_connector.create_backup_streaming(
                 dbname=dbname, is_full=is_full, stripe_count=stripe_count, 
                 output_dir=output_dir)
         except BackupException:
@@ -291,7 +291,7 @@ class BackupAgent:
             out("Skipping backup of database {}".format(dbname))
             return
 
-        stripe_count = self.executable_connectorector.determine_database_backup_stripe_count(dbname=dbname, is_full=is_full)
+        stripe_count = self.executable_connector.determine_database_backup_stripe_count(dbname=dbname, is_full=is_full)
 
         backup_exception=None
         try:
@@ -338,7 +338,7 @@ class BackupAgent:
             logging.fatal(message)
             raise BackupException(message)
 
-        ddl_content = self.executable_connectorector.create_ddlgen(dbname=dbname)
+        ddl_content = self.executable_connector.create_ddlgen(dbname=dbname)
         ddlgen_file_name=Naming.construct_ddlgen_name(dbname=dbname, start_timestamp=start_timestamp)
         self.backup_configuration.storage_client.create_blob_from_text(
             container_name=self.backup_configuration.azure_storage_container_name,
@@ -455,7 +455,7 @@ class BackupAgent:
 
     def restore(self, restore_point, output_dir, databases):
         print("Retriving point-in-time restore {} for databases {}".format(restore_point, str(databases)))
-        databases = self.executable_connectorector.determine_databases(user_selected_databases=databases, is_full=True)
+        databases = self.executable_connector.determine_databases(user_selected_databases=databases, is_full=True)
         skip_dbs = self.backup_configuration.get_databases_to_skip()
         databases = filter(lambda db: not (db in skip_dbs), databases)
         for dbname in databases:
