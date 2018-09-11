@@ -4,9 +4,13 @@ azure.storage.container_name:  immutab
 local_temp_directory:          /tmp
 notification_command:          /usr/sbin/ticmcmc --stdin
 
-commandline.tmp_dir:           tar cvfz - /tmp
-commandline.everything:        tar cvfz - / --exclude=/dev --exclude=/proc --exclude=/run --exclude=/sys
-commandline.someecho:          echo "hallo"
+command.backup.tmp_dir:         tar cvzf - /tmp
+command.backup.osdisk:          tar cvzf - / --exclude=/dev --exclude=/proc --exclude=/run --exclude=/sys
+command.backup.testecho:        echo "hallo"
+
+command.restore.tmp_dir:        tar xvzf -
+command.restore.osdisk:         tar xvzf -
+command.restore.testecho:       tee /tmp/restore_test
 
 # 
 # $ azbackup --config-file /etc/azfileback --configurion-key==everything
