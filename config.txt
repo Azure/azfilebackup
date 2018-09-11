@@ -1,5 +1,5 @@
 
-azure.storage.account_name:    sadjfksjlahfkj
+azure.storage.account_name:    testhecbackup
 azure.storage.container_name:  immutab
 local_temp_directory:          /tmp
 notification_command:          /usr/sbin/ticmcmc --stdin

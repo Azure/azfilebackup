@@ -1,4 +1,5 @@
 """Unit tests for backupconfiguration."""
+import os
 import json
 import unittest
 from mock import patch
@@ -48,7 +49,7 @@ class TestBackupConfiguration(unittest.TestCase):
 
     def test_get_azure_storage_account_name(self):
         """test get_azure_storage_account_name"""
-        self.assertEqual(self.cfg.get_azure_storage_account_name(), 'sadjfksjlahfkj')
+        self.assertEqual(self.cfg.get_azure_storage_account_name(), 'testhecbackup')
 
     def test_get_backup_command(self):
         """test get_commandline"""
@@ -67,6 +68,12 @@ class TestBackupConfiguration(unittest.TestCase):
         self.assertIn('tmp_dir', filesets)
         self.assertIn('osdisk', filesets)
         self.assertIn('testecho', filesets)
+
+    def test_get_storage_client_with_key(self):
+        """test get_storage_client_with_key"""
+        key = os.environ['STORAGE_KEY']
+        client = self.cfg.get_storage_client_with_key(key)
+        self.assertEqual(client.protocol, 'https')
 
     def tearDown(self):
         self.patcher1.stop()

@@ -151,3 +151,17 @@ class BackupConfiguration(object):
             _created = self._block_blob_service.create_container(
                 container_name=self.azure_storage_container_name)
         return self._block_blob_service
+
+    def get_storage_client_with_key(self, key):
+        """Create or return BlockBlobService client using given key."""
+        if not self._block_blob_service:
+            account_name = self.get_azure_storage_account_name()
+
+            self._block_blob_service = BlockBlobService(
+                account_name=account_name,
+                account_key=key)
+
+            _created = self._block_blob_service.create_container(
+                container_name=self.azure_storage_container_name)
+
+        return self._block_blob_service
