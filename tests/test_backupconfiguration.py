@@ -50,10 +50,16 @@ class TestBackupConfiguration(unittest.TestCase):
         """test get_azure_storage_account_name"""
         self.assertEqual(self.cfg.get_azure_storage_account_name(), 'sadjfksjlahfkj')
 
-    def test_get_commandline(self):
+    def test_get_backup_command(self):
         """test get_commandline"""
-        self.assertEqual(self.cfg.get_commandline('tmp_dir'), 'tar cvfz - /tmp')
-        self.assertEqual(self.cfg.get_commandline('everything'), 'tar cvfz - / --exclude=/dev --exclude=/proc --exclude=/run --exclude=/sys')
+        self.assertEqual(self.cfg.get_backup_command('tmp_dir'), 'tar cvzf - /tmp')
+        self.assertEqual(self.cfg.get_backup_command('osdisk'),
+                         'tar cvzf - / --exclude=/dev --exclude=/proc --exclude=/run --exclude=/sys')
+
+    def test_get_restore_command(self):
+        """test get_commandline"""
+        self.assertEqual(self.cfg.get_restore_command('tmp_dir'), 'tar xvzf -')
+        self.assertEqual(self.cfg.get_restore_command('osdisk'), 'tar xvzf -')
 
     def tearDown(self):
         self.patcher1.stop()

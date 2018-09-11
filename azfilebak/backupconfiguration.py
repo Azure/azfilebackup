@@ -95,9 +95,13 @@ class BackupConfiguration(object):
         """Get location."""
         return self.get_value("location")
 
-    def get_commandline(self, configuration_name):
-        """Get command line."""
-        return self.cfg_file_value("commandline.{}".format(configuration_name))
+    def get_backup_command(self, configuration_name):
+        """Get backup command line for given fileset."""
+        return self.cfg_file_value("commandline.backup.{}".format(configuration_name))
+
+    def get_restore_command(self, configuration_name):
+        """Get restore command line for given fileset."""
+        return self.cfg_file_value("commandline.restore.{}".format(configuration_name))
 
     def get_fs_backup_interval_min(self):
         """Get minimum backup interval."""
