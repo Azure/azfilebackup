@@ -97,11 +97,11 @@ class BackupConfiguration(object):
 
     def get_backup_command(self, configuration_name):
         """Get backup command line for given fileset."""
-        return self.cfg_file_value("commandline.backup.{}".format(configuration_name))
+        return self.cfg_file_value("command.backup.{}".format(configuration_name))
 
     def get_restore_command(self, configuration_name):
         """Get restore command line for given fileset."""
-        return self.cfg_file_value("commandline.restore.{}".format(configuration_name))
+        return self.cfg_file_value("command.restore.{}".format(configuration_name))
 
     def get_fs_backup_interval_min(self):
         """Get minimum backup interval."""
@@ -122,6 +122,11 @@ class BackupConfiguration(object):
     def get_azure_storage_account_name(self):
         """Get storage account name."""
         return self.get_value("azure.storage.account_name")
+
+    def get_filesets(self):
+        """Return a list of filesets, extrapolated from the command.backup configuration values."""
+        config_keys = self.cfg_file.get_keys_prefix('command.backup')
+        return [k.replace('command.backup.', '') for k in config_keys]
 
     @property
     def azure_storage_container_name(self):

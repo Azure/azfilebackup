@@ -25,6 +25,11 @@ class BackupConfigurationFile(object):
         values = BackupConfigurationFile.read_key_value_file(filename=self.filename)
         return values[key]
 
+    def get_keys_prefix(self, prefix):
+        """Retrieve all keys that match a certain prefix."""
+        values = BackupConfigurationFile.read_key_value_file(filename=self.filename)
+        return [i for i in values.keys() if re.match(prefix, i)]
+
     @staticmethod
     def read_key_value_file(filename):
         """

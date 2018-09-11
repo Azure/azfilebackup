@@ -61,6 +61,13 @@ class TestBackupConfiguration(unittest.TestCase):
         self.assertEqual(self.cfg.get_restore_command('tmp_dir'), 'tar xvzf -')
         self.assertEqual(self.cfg.get_restore_command('osdisk'), 'tar xvzf -')
 
+    def test_get_filesets(self):
+        """test get_filesets"""
+        filesets = self.cfg.get_filesets()
+        self.assertIn('tmp_dir', filesets)
+        self.assertIn('osdisk', filesets)
+        self.assertIn('testecho', filesets)
+
     def tearDown(self):
         self.patcher1.stop()
 
