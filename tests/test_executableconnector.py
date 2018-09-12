@@ -14,6 +14,8 @@ class TestExecutableConnector(unittest.TestCase):
         """Test create backup."""
         proc = self.connector.create_backup(fileset='tmp_dir', is_full=True)
         proc.wait()
+        if proc.returncode != 0:
+            print proc.stderr.read()
         self.assertEqual(proc.returncode, 0)
 
 if __name__ == '__main__':

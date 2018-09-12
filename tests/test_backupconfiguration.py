@@ -53,7 +53,7 @@ class TestBackupConfiguration(unittest.TestCase):
 
     def test_get_backup_command(self):
         """test get_commandline"""
-        self.assertEqual(self.cfg.get_backup_command('tmp_dir'), 'tar cvzf - /tmp')
+        self.assertEqual(self.cfg.get_backup_command('tmp_dir'), 'tar cvzf - /tmp --ignore-failed-read')
         self.assertEqual(self.cfg.get_backup_command('osdisk'),
                          'tar cvzf - / --exclude=/dev --exclude=/proc --exclude=/run --exclude=/sys')
 

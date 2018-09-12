@@ -15,5 +15,9 @@ steps:
   - script: pip install -e .
     displayName: 'Install requirements'
 
+  - script: mkdir -p /tmp
+    displayName: 'Create temp directory'
+
   - script: python setup.py test
     displayName: 'Run tests'
+
