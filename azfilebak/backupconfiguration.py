@@ -1,6 +1,7 @@
 # coding=utf-8
 """BackupConfiguration module."""
 
+import os
 from azure.storage.blob import BlockBlobService
 from msrestazure.azure_active_directory import MSIAuthentication
 from .azurevminstancemetadata import AzureVMInstanceMetadata
@@ -138,28 +139,23 @@ class BackupConfiguration(object):
         """Create or return BlockBlobService client."""
         if not self._block_blob_service:
             account_name = self.get_azure_storage_account_name()
-            #
-            # Use the Azure Managed Service Identity ('MSI') to fetch an
-            # Azure AD token to talk to Azure Storage (PREVIEW!!!)
-            #
-            token_credential = MSIAuthentication(
-                resource='https://{account_name}.blob.core.windows.net'.format(
-                    account_name=account_name))
-            self._block_blob_service = BlockBlobService(
-                account_name=account_name,
-                token_credential=token_credential)
-            _created = self._block_blob_service.create_container(
-                container_name=self.azure_storage_container_name)
-        return self._block_blob_service
-
-    def get_storage_client_with_key(self, key):
-        """Create or return BlockBlobService client using given key."""
-        if not self._block_blob_service:
-            account_name = self.get_azure_storage_account_name()
-
-            self._block_blob_service = BlockBlobService(
-                account_name=account_name,
-                account_key=key)
+            if os.environ.has_key('STORAGE_KEY'):
+                # We got the storage key through an environment variable
+                # (mostly for testing purposes)
+                self._block_blob_service = BlockBlobService(
+                    account_name=account_name,
+                    account_key=os.environ['STORAGE_KEY'])
+            else:
+                #
+                # Use the Azure Managed Service Identity ('MSI') to fetch an
+                # Azure AD token to talk to Azure Storage (PREVIEW!!!)
+                #
+                token_credential = MSIAuthentication(
+                    resource='https://{account_name}.blob.core.windows.net'.format(
+                        account_name=account_name))
+                self._block_blob_service = BlockBlobService(
+                    account_name=account_name,
+                    token_credential=token_credential)
 
             _created = self._block_blob_service.create_container(
                 container_name=self.azure_storage_container_name)

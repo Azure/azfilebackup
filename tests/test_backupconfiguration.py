@@ -69,10 +69,11 @@ class TestBackupConfiguration(unittest.TestCase):
         self.assertIn('osdisk', filesets)
         self.assertIn('testecho', filesets)
 
-    def test_get_storage_client_with_key(self):
-        """test get_storage_client_with_key"""
-        key = os.environ['STORAGE_KEY']
-        client = self.cfg.get_storage_client_with_key(key)
+    def test_storage_client(self):
+        """test storage_client"""
+        if not os.environ.has_key('STORAGE_KEY'):
+            return True
+        client = self.cfg.storage_client
         self.assertEqual(client.protocol, 'https')
 
     def tearDown(self):
