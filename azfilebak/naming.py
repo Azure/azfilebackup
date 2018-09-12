@@ -115,3 +115,11 @@ class Naming(object):
             fileset=parts[0],
             is_full=parts[1],
             start_timestamp=parts[2])
+
+    @staticmethod
+    def temp_container_name(fileset, start_timestamp):
+        """Temporary container name to upload the blob to."""
+        return "tmp-{fileset}-{start_timestamp}".format(
+            fileset=fileset,
+            start_timestamp=start_timestamp
+            ).replace("_", "-").lower()
