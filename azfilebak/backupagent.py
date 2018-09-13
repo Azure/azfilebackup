@@ -190,7 +190,7 @@ class BackupAgent(object):
     def backup(self, filesets, is_full, force):
         """Backup a list of filesets."""
         filesets_to_backup = filesets
-        if filesets_to_backup.len() == 0:
+        if not filesets_to_backup:
             filesets_to_backup = self.backup_configuration.get_filesets()
 
         for fileset in filesets_to_backup:
