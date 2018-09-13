@@ -1,15 +1,15 @@
+"""Runner module."""
 # coding=utf-8
 
+import sys
+import os
+import os.path
+import getpass
+import socket
 import logging
 import argparse
 import pid
-import sys
-import os
-import getpass
-import socket
-import os.path
 
-from .funcmodule import printe
 from .backupagent import BackupAgent
 from .backupconfiguration import BackupConfiguration
 from .scheduleparser import ScheduleParser
@@ -17,11 +17,17 @@ from .timing import Timing
 from .backupexception import BackupException
 from .__init__ import version
 
-class Runner:
+class Runner(object):
+    """
+    The Runner class parses the command line arguments and calls the
+    BackupAgent to execute the actual actions.
+    """
+
     @staticmethod
     def configure_logging():
+        """Configure logging."""
         logging.basicConfig(
-            filename="asebackupcli.log",
+            filename="azfilebak.log",
             level=logging.DEBUG,
             format="%(asctime)-15s pid-%(process)d line-%(lineno)d %(levelname)s: \"%(message)s\""
             )
@@ -29,27 +35,40 @@ class Runner:
 
     @staticmethod
     def arg_parser():
+        """Parse arguments."""
         parser = argparse.ArgumentParser()
-        requiredNamed = parser.add_argument_group("required arguments")
-        requiredNamed.add_argument("-c",  "--config", help="the path to the config file")
+
+        required = parser.add_argument_group("required arguments")
+        required.add_argument("-c", "--config", help="the path to the config file")
 
         commands = parser.add_argument_group("commands")
-        commands.add_argument("-f",  "--full-backup", help="Perform backup for configuration")
-        commands.add_argument("-r",  "--restore", help="Perform restore for date")
-        commands.add_argument("-l",  "--list-backups", help="Lists all backups in Azure storage", action="store_true")
-        commands.add_argument("-p",  "--prune-old-backups", help="Removes old backups from Azure storage ('--prune-old-backups 30d' removes files older 30 days)")
-        commands.add_argument("-x",  "--show-configuration", help="Shows the VM's configuration values", action="store_true")
-        commands.add_argument("-u",  "--unit-tests", help="Run unit tests", action="store_true")
+
+        commands.add_argument("-f", "--full-backup", help="Perform backup for configuration", action="store_true")
+        commands.add_argument("-r", "--restore", help="Perform restore for date")
+        commands.add_argument("-l", "--list-backups", help="Lists all backups in Azure storage",
+                              action="store_true")
+        commands.add_argument("-p", "--prune-old-backups",
+                              help="Removes old backups from Azure storage ('--prune-old-backups 30d' removes files older 30 days)")
+        commands.add_argument("-x", "--show-configuration",
+                              help="Shows the VM's configuration values",
+                              action="store_true")
+        commands.add_argument("-u", "--unit-tests", help="Run unit tests", action="store_true")
 
         options = parser.add_argument_group("options")
 
+        options.add_argument("-y", "--force",
+                             help="Perform forceful backup (ignores age of last backup or business hours)",
+                             action="store_true")
+
+        options.add_argument("-F", "--fileset", help="Select fileset(s) to backup or restore ('--fileset A,B,C')")
+
         options.add_argument("-o",  "--output-dir", help="Specify target folder for backup files")
-        options.add_argument("-y",  "--force", help="Perform forceful backup (ignores age of last backup or business hours)", action="store_true")
-        options.add_argument("-s",  "--skip-upload", help="Skip uploads of backup files", action="store_true")
+
         return parser
 
     @staticmethod
     def log_script_invocation():
+        """Return a string containing invocation details"""
         return ", ".join([
             "Script version v{}".format(version()),
             "Script arguments: {}".format(str(sys.argv)),
@@ -63,19 +82,19 @@ class Runner:
 
     @staticmethod
     def get_config_file(args, parser):
+        """Check the existence of the configuration file and returns its absolute path."""
         if args.config:
             config_file = os.path.abspath(args.config)
             if not os.path.isfile(config_file):
-                raise(BackupException("Cannot find configuration file '{}'".format(config_file)))
-
+                raise BackupException("Cannot find configuration file '{}'".format(config_file))
             return config_file
         else:
             parser.print_help()
-
-            raise(BackupException("Please specify a configuration file."))
+            raise BackupException("Please specify a configuration file.")
 
     @staticmethod
     def get_output_dir(args):
+        """Determine output (temp) directory and check that it is usable."""
 
         if args.output_dir:
             output_dir = os.path.abspath(args.output_dir)
@@ -87,34 +106,36 @@ class Runner:
             output_dir = os.path.abspath("/tmp")
             specified_via = "fallback dir"
 
-        logging.debug("Output dir ({}): {}".format(specified_via, output_dir))
+        logging.debug("Output dir (%s): %s", specified_via, output_dir)
 
         if not os.path.exists(output_dir):
             raise BackupException("Directory {} does not exist".format(output_dir))
 
         try:
             test_file_name = os.path.join(output_dir, '__delete_me_ase_backup_test__.txt')
-            with open(test_file_name,'wt') as testfile:
+            with open(test_file_name, 'wt') as testfile:
                 testfile.write("Hallo")
             os.remove(test_file_name)
         except Exception:
-            raise BackupException("Directory {} ({}) is not writable".format(output_dir, specified_via))
+            raise BackupException("Directory {} ({}) is not writable"
+                                  .format(output_dir, specified_via))
 
         return output_dir
 
-
     @staticmethod
-    def get_databases(args):
-        if args.databases:
-            databases = args.databases.split(",")
-            logging.debug("User manually selected databases: {}".format(str(databases)))
-            return databases
-        else:
-            logging.debug("User did not select databases, trying to backup all databases")
-            return []
+    def get_filesets(args):
+        """ Determine filesets to backup or restore."""
+        if args.fileset:
+            filesets = args.fileset.split(",")
+            logging.debug("User manually selected filesets: %s", str(filesets))
+            return filesets
+
+        logging.debug("User did not select filesets, trying to backup all filesets")
+        return []
 
     @staticmethod
     def run_unit_tests():
+        """Run doctests."""
         import doctest
         # import unittest
         # suite = unittest.TestSuite()
@@ -126,6 +147,8 @@ class Runner:
 
     @staticmethod
     def main():
+        """Main method."""
+
         Runner.configure_logging()
         logging.info("#######################################################################################################")
         logging.info("#                                                                                                     #")
@@ -143,18 +166,17 @@ class Runner:
         backup_configuration = BackupConfiguration(config_file)
         backup_agent = BackupAgent(backup_configuration)
         output_dir = Runner.get_output_dir(args)
+        filesets = Runner.get_filesets(args)
 
-        skip_upload=args.skip_upload
-        force=args.force
+        force = args.force
 
         for line in backup_agent.get_configuration_printable(output_dir=output_dir):
             logging.debug(line)
 
         if args.full_backup:
             try:
-                #is_full, databases, output_dir, force, skip_upload, use_streaming
-                with pid.PidFile(pidname='files-backup-full', piddir=".") as _p:
-                    backup_agent.backup(databases=databases, output_dir=output_dir, force=force, skip_upload=skip_upload, backup_configuration=args.full_backup)
+                with pid.PidFile(pidname='fileset-backup-full', piddir=".") as _p:
+                    backup_agent.backup(filesets=filesets, is_full=args.full_backup, force=force)
             except pid.PidFileAlreadyLockedError:
                 logging.warn("Skip full backup, already running")
         elif args.restore:
@@ -163,12 +185,12 @@ class Runner:
             except Exception:
                 raise BackupException("Cannot parse restore point \"{}\"".format(args.restore))
 
-            backup_agent.restore(restore_point=args.restore, output_dir=output_dir, databases=databases)
+            backup_agent.restore(restore_point=args.restore, output_dir=output_dir, filesets=filesets)
         elif args.list_backups:
-            backup_agent.list_backups(databases=databases)
+            backup_agent.list_backups(filesets=filesets)
         elif args.prune_old_backups:
             age = ScheduleParser.parse_timedelta(args.prune_old_backups)
-            backup_agent.prune_old_backups(older_than=age, databases=databases)
+            backup_agent.prune_old_backups(older_than=age, filesets=filesets)
         elif args.unit_tests:
             Runner.run_unit_tests()
         elif args.show_configuration:
