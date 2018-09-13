@@ -35,9 +35,9 @@ class BackupConfigurationFile(object):
         """
         Parse a configuration file and return a dictionary of key/values.
 
-        >>> values = BackupConfigurationFile.read_key_value_file(filename="config.txt.template")
-        >>> values["sap.CID"]
-        'AZU'
+        >>> values = BackupConfigurationFile.read_key_value_file(filename="config.txt")
+        >>> values["local_temp_directory"]
+        '/tmp'
         """
 
         with open(filename, mode='rt') as config_file:
