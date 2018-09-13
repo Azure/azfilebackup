@@ -396,9 +396,11 @@ class BackupAgent(object):
         return filter(lambda x: x.endswith(".cdmp"), existing_blobs)
 
     def show_configuration(self, output_dir):
+        """Return printable string of configuration parameters."""
         return "\n".join(self.get_configuration_printable(output_dir=output_dir))
 
     def get_configuration_printable(self, output_dir):
+        """Get array of configuration parameters."""
         business_hours = self.backup_configuration.get_business_hours()
         day_f = lambda d: [None, "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][d]
         b2s_f = lambda x: {True:"1", False:"0"}[x]
@@ -412,7 +414,6 @@ class BackupAgent(object):
             "",
             "Output dir:                         {}".format(output_dir),
             "",
-            "skipped databases:                  {}".format(self.backup_configuration.get_databases_to_skip()),
             "fs_backup_interval_min:             {}".format(self.backup_configuration.get_fs_backup_interval_min()),
             "fs_backup_interval_max:             {}".format(self.backup_configuration.get_fs_backup_interval_max()),
         ] + hours + [
