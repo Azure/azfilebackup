@@ -31,11 +31,11 @@ class Naming(object):
     def construct_filename(fileset, is_full, start_timestamp):
         """
         >>> Naming.construct_filename(fileset="test1fs", is_full=True, start_timestamp="20180601_112429")
-        'test1fs_full_20180601_112429.tar'
+        'test1fs_full_20180601_112429.tar.gz'
         >>> Naming.construct_filename(fileset="test1fs", is_full=False, start_timestamp="20180601_112429")
-        'test1fs_tran_20180601_112429.tar'
+        'test1fs_tran_20180601_112429.tar.gz'
         """
-        return "{fileset}_{type}_{start_timestamp}.tar".format(
+        return "{fileset}_{type}_{start_timestamp}.tar.gz".format(
             fileset=fileset,
             type=Naming.backup_type_str(is_full),
             start_timestamp=start_timestamp)
@@ -46,7 +46,7 @@ class Naming(object):
         Construct file name with directory.
 
         >>> Naming.local_filesystem_name(directory="/tmp", fileset="test1fs", is_full=True, start_timestamp="20180601_112429")
-        '/tmp/test1fs_full_20180601_112429.tar'
+        '/tmp/test1fs_full_20180601_112429.tar.gz'
         """
         file_name = Naming.construct_filename(
             fileset, is_full, start_timestamp)
@@ -64,9 +64,9 @@ class Naming(object):
     def construct_blobname(fileset, is_full, start_timestamp, end_timestamp):
         """
         >>> Naming.construct_blobname(fileset="test1fs", is_full=True, start_timestamp="20180601_112429", end_timestamp="20180601_131234")
-        'test1fs_full_20180601_112429--20180601_131234.tar'
+        'test1fs_full_20180601_112429--20180601_131234.tar.gz'
         """
-        return "{fileset}_{type}_{start}--{end}.tar".format(
+        return "{fileset}_{type}_{start}--{end}.tar.gz".format(
             fileset=fileset,
             type=Naming.backup_type_str(is_full),
             start=start_timestamp, end=end_timestamp)
@@ -74,14 +74,14 @@ class Naming(object):
     @staticmethod
     def parse_filename(filename):
         """
-        >>> Naming.parse_filename('test1fs_full_20180601_112429.tar')
+        >>> Naming.parse_filename('test1fs_full_20180601_112429.tar.gz')
         ('test1fs', True, '20180601_112429')
-        >>> Naming.parse_filename('test1fs_tran_20180601_112429.tar')
+        >>> Naming.parse_filename('test1fs_tran_20180601_112429.tar.gz')
         ('test1fs', False, '20180601_112429')
         >>> Naming.parse_filename('bad_input') == None
         True
         """
-        m = re.search(r'(?P<fileset>\S+?)_(?P<type>full|tran)_(?P<start>\d{8}_\d{6})\.tar', filename)
+        m = re.search(r'(?P<fileset>\S+?)_(?P<type>full|tran)_(?P<start>\d{8}_\d{6})\.tar.gz', filename)
         if m is None:
             return None
 
@@ -92,14 +92,14 @@ class Naming(object):
     @staticmethod
     def parse_blobname(filename):
         """
-        >>> Naming.parse_blobname('test1fs_full_20180601_112429--20180601_131234.tar')
+        >>> Naming.parse_blobname('test1fs_full_20180601_112429--20180601_131234.tar.gz')
         ('test1fs', True, '20180601_112429', '20180601_131234')
-        >>> Naming.parse_blobname('test1fs_tran_20180601_112429--20180601_131234.tar')
+        >>> Naming.parse_blobname('test1fs_tran_20180601_112429--20180601_131234.tar.gz')
         ('test1fs', False, '20180601_112429', '20180601_131234')
         >>> Naming.parse_filename('bad_input') == None
         True
         """
-        m = re.search(r'(?P<fileset>\S+?)_(?P<type>full|tran)_(?P<start>\d{8}_\d{6})--(?P<end>\d{8}_\d{6})\.tar', filename)
+        m = re.search(r'(?P<fileset>\S+?)_(?P<type>full|tran)_(?P<start>\d{8}_\d{6})--(?P<end>\d{8}_\d{6})\.tar.gz', filename)
         if m is None:
             return None
 
