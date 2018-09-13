@@ -13,9 +13,9 @@ class TestExecutableConnector(unittest.TestCase):
     def test_create_backup(self):
         """Test create backup."""
         proc = self.connector.create_backup(fileset='tmp_dir', is_full=True)
-        proc.wait()
+        (stdoutdata, stderrdata) = proc.communicate(None)
         if proc.returncode != 0:
-            print proc.stderr.read()
+            print stderrdata
         self.assertEqual(proc.returncode, 0)
 
 if __name__ == '__main__':
