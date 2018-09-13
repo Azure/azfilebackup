@@ -3,19 +3,17 @@
 import logging
 import os
 import datetime
-import threading
 from itertools import groupby
 import json
 import urllib2
 import uuid
 import time
 
-from .funcmodule import printe, out, log_stdout_stderr
 from .naming import Naming
 from .timing import Timing
 from .executableconnector import ExecutableConnector
-from .backupexception import BackupException
-from .streamingthread import StreamingThread
+from .businesshours import BusinessHours
+from .scheduleparser import ScheduleParser
 
 class BackupAgent(object):
     """
@@ -26,9 +24,9 @@ class BackupAgent(object):
         self.backup_configuration = backup_configuration
         self.executable_connector = ExecutableConnector(self.backup_configuration)
 
-    """
-    Scheduling methods.
-    """
+    #
+    # Scheduling methods.
+    #
 
     def existing_backups_for_fileset(self, fileset, is_full):
         existing_blobs_dict = dict()
@@ -88,61 +86,64 @@ class BackupAgent(object):
         return Timing.sort(existing_blobs_dict.keys())[-1:][0]
 
     @staticmethod
-    def should_run_full_backup(now_time, force, latest_full_backup_timestamp, business_hours, db_backup_interval_min, db_backup_interval_max):
+    def should_run_full_backup(now_time, force, latest_full_backup_timestamp,
+                               business_hours, db_backup_interval_min, db_backup_interval_max):
         """
-            Determine whether a backup should be executed. 
+        Determine whether a backup should be executed.
 
-            >>> business_hours=BusinessHours.parse_tag_str(BusinessHours._BusinessHours__sample_data())
-            >>> db_backup_interval_min=ScheduleParser.parse_timedelta("24h")
-            >>> db_backup_interval_max=ScheduleParser.parse_timedelta("3d")
-            >>> five_day_backup =        "20180601_010000"
-            >>> two_day_backup =         "20180604_010000"
-            >>> same_day_backup =        "20180606_010000"
-            >>> during_business_hours  = "20180606_150000"
-            >>> outside_business_hours = "20180606_220000"
-            >>> 
-            >>> # Forced
-            >>> BackupAgent.should_run_full_backup(now_time=during_business_hours, force=True, latest_full_backup_timestamp=same_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
-            True
-            >>> # Forced
-            >>> BackupAgent.should_run_full_backup(now_time=during_business_hours, force=True, latest_full_backup_timestamp=two_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
-            True
-            >>> # Forced
-            >>> BackupAgent.should_run_full_backup(now_time=during_business_hours, force=True, latest_full_backup_timestamp=five_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
-            True
-            >>> # respecting business hours, and not needed anyway
-            >>> BackupAgent.should_run_full_backup(now_time=during_business_hours, force=False, latest_full_backup_timestamp=same_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
-            False
-            >>> # respecting business hours
-            >>> BackupAgent.should_run_full_backup(now_time=during_business_hours, force=False, latest_full_backup_timestamp=two_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
-            False
-            >>> # a really old backup, so we ignore business hours
-            >>> BackupAgent.should_run_full_backup(now_time=during_business_hours, force=False, latest_full_backup_timestamp=five_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
-            True
-            >>> # outside_business_hours, but same_day_backup, so no backup
-            >>> BackupAgent.should_run_full_backup(now_time=outside_business_hours, force=False, latest_full_backup_timestamp=same_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
-            False
-            >>> # outside_business_hours and need to backup
-            >>> BackupAgent.should_run_full_backup(now_time=outside_business_hours, force=False, latest_full_backup_timestamp=two_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
-            True
-            >>> # a really old backup
-            >>> BackupAgent.should_run_full_backup(now_time=outside_business_hours, force=False, latest_full_backup_timestamp=five_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
-            True
-            >>> # Forced
-            >>> BackupAgent.should_run_full_backup(now_time=outside_business_hours, force=True, latest_full_backup_timestamp=same_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
-            True
-            >>> # Forced
-            >>> BackupAgent.should_run_full_backup(now_time=outside_business_hours, force=True, latest_full_backup_timestamp=two_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
-            True
-            >>> # Forced
-            >>> BackupAgent.should_run_full_backup(now_time=outside_business_hours, force=True, latest_full_backup_timestamp=five_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
-            True
+        >>> business_hours=BusinessHours.parse_tag_str(BusinessHours._BusinessHours__sample_data())
+        >>> db_backup_interval_min=ScheduleParser.parse_timedelta("24h")
+        >>> db_backup_interval_max=ScheduleParser.parse_timedelta("3d")
+        >>> five_day_backup =        "20180601_010000"
+        >>> two_day_backup =         "20180604_010000"
+        >>> same_day_backup =        "20180606_010000"
+        >>> during_business_hours  = "20180606_150000"
+        >>> outside_business_hours = "20180606_220000"
+        >>>
+        >>> # Forced
+        >>> BackupAgent.should_run_full_backup(now_time=during_business_hours, force=True, latest_full_backup_timestamp=same_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
+        True
+        >>> # Forced
+        >>> BackupAgent.should_run_full_backup(now_time=during_business_hours, force=True, latest_full_backup_timestamp=two_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
+        True
+        >>> # Forced
+        >>> BackupAgent.should_run_full_backup(now_time=during_business_hours, force=True, latest_full_backup_timestamp=five_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
+        True
+        >>> # respecting business hours, and not needed anyway
+        >>> BackupAgent.should_run_full_backup(now_time=during_business_hours, force=False, latest_full_backup_timestamp=same_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
+        False
+        >>> # respecting business hours
+        >>> BackupAgent.should_run_full_backup(now_time=during_business_hours, force=False, latest_full_backup_timestamp=two_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
+        False
+        >>> # a really old backup, so we ignore business hours
+        >>> BackupAgent.should_run_full_backup(now_time=during_business_hours, force=False, latest_full_backup_timestamp=five_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
+        True
+        >>> # outside_business_hours, but same_day_backup, so no backup
+        >>> BackupAgent.should_run_full_backup(now_time=outside_business_hours, force=False, latest_full_backup_timestamp=same_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
+        False
+        >>> # outside_business_hours and need to backup
+        >>> BackupAgent.should_run_full_backup(now_time=outside_business_hours, force=False, latest_full_backup_timestamp=two_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
+        True
+        >>> # a really old backup
+        >>> BackupAgent.should_run_full_backup(now_time=outside_business_hours, force=False, latest_full_backup_timestamp=five_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
+        True
+        >>> # Forced
+        >>> BackupAgent.should_run_full_backup(now_time=outside_business_hours, force=True, latest_full_backup_timestamp=same_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
+        True
+        >>> # Forced
+        >>> BackupAgent.should_run_full_backup(now_time=outside_business_hours, force=True, latest_full_backup_timestamp=two_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
+        True
+        >>> # Forced
+        >>> BackupAgent.should_run_full_backup(now_time=outside_business_hours, force=True, latest_full_backup_timestamp=five_day_backup, business_hours=business_hours, db_backup_interval_min=db_backup_interval_min, db_backup_interval_max=db_backup_interval_max)
+        True
         """
         allowed_by_business = business_hours.is_backup_allowed_time(now_time)
         age_of_latest_backup_in_storage = Timing.time_diff(latest_full_backup_timestamp, now_time)
         min_interval_allows_backup = age_of_latest_backup_in_storage > db_backup_interval_min
         max_interval_requires_backup = age_of_latest_backup_in_storage > db_backup_interval_max
-        perform_full_backup = (allowed_by_business and min_interval_allows_backup or max_interval_requires_backup or force)
+        perform_full_backup = (
+            allowed_by_business and min_interval_allows_backup
+            or max_interval_requires_backup or force)
 
         # logging.info("Full backup requested. Current time: {now}. Last backup in storage: {last}. Age of backup {age}".format(now=now_time, last=latest_full_backup_timestamp, age=age_of_latest_backup_in_storage))
         # logging.info("Backup requirements: min=\"{min}\" max=\"{max}\"".format(min=db_backup_interval_min,max=db_backup_interval_max))
@@ -152,49 +153,56 @@ class BackupAgent(object):
         return perform_full_backup
 
     @staticmethod
-    def should_run_tran_backup(now_time, force, latest_tran_backup_timestamp, log_backup_interval_min):
+    def should_run_tran_backup(now_time, force, latest_tran_backup_timestamp,
+                               log_backup_interval_min):
+        """Determine if a 'tran' backup can be performed according to backup window rules."""
         if force:
             return True
 
         age_of_latest_backup_in_storage = Timing.time_diff(latest_tran_backup_timestamp, now_time)
         min_interval_allows_backup = age_of_latest_backup_in_storage > log_backup_interval_min
         perform_tran_backup = min_interval_allows_backup
-        return perform_tran_backup 
+        return perform_tran_backup
 
     def should_run_backup(self, fileset, is_full, force, start_timestamp):
+        """Determine if a backup can be performed according to backup window rules."""
         if is_full:
             result = BackupAgent.should_run_full_backup(
-                now_time=start_timestamp, 
-                force=force, 
+                now_time=start_timestamp,
+                force=force,
                 latest_full_backup_timestamp=self.latest_backup_timestamp(fileset=fileset, is_full=is_full),
                 business_hours=self.backup_configuration.get_business_hours(),
                 db_backup_interval_min=self.backup_configuration.get_fs_backup_interval_min(),
                 db_backup_interval_max=self.backup_configuration.get_fs_backup_interval_max())
         else:
             result = BackupAgent.should_run_tran_backup(
-                now_time=start_timestamp, 
+                now_time=start_timestamp,
                 force=force,
                 latest_tran_backup_timestamp=self.latest_backup_timestamp(fileset=fileset, is_full=is_full),
                 log_backup_interval_min=self.backup_configuration.get_log_backup_interval_min())
 
         return result
 
-    """
-    Backup methods.
-    """
+    #
+    # Backup methods.
+    #
 
     def backup(self, filesets, is_full, force):
+        """Backup a list of filesets."""
         filesets_to_backup = filesets
         if filesets_to_backup.len() == 0:
             filesets_to_backup = self.backup_configuration.get_filesets()
- 
+
         for fileset in filesets_to_backup:
             self.backup_single_fileset(fileset=fileset, is_full=is_full, force=force)
 
     def backup_single_fileset(self, fileset, is_full, force):
+        """Backup a single fileset."""
         start_timestamp = Timing.now_localtime()
-        if not self.should_run_backup(fileset=fileset, is_full=is_full, force=force, start_timestamp=start_timestamp):
-            out("Skipping backup of fileset {}".format(fileset))
+        if not self.should_run_backup(
+                fileset=fileset, is_full=is_full,
+                force=force, start_timestamp=start_timestamp):
+            logging.warn("Skipping backup of fileset %s", fileset)
             return
 
         # Create temporary container to hold the backup blob
@@ -225,7 +233,7 @@ class BackupAgent(object):
         except Exception as ex:
             # Delete the temporary container
             storage_client.delete_container(container_name=temp_container_name)
-            raise
+            raise ex
 
         end_timestamp = Timing.now_localtime()
 
@@ -244,7 +252,9 @@ class BackupAgent(object):
         while copy.status != 'success':
             logging.debug("Waiting for copy; status: %s", copy.status)
             time.sleep(30)
-            copy = storage_client.get_blob_properties(dest_container_name, new_blob_name).properties.copy
+            copy = storage_client.get_blob_properties(
+                dest_container_name,
+                new_blob_name).properties.copy
 
         # Delete sources
         storage_client.delete_container(container_name=temp_container_name)
@@ -252,9 +262,9 @@ class BackupAgent(object):
         # Return name of new blob
         return new_blob_name
 
-    """
-    Other commands. (TBD)
-    """
+    #
+    # Other commands. (TBD)
+    #
 
     def list_backups(self, filesets = []):
         baks_dict = self.existing_backups(filesets=filesets)
