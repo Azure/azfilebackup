@@ -25,10 +25,11 @@ class BackupAgent(object):
         self.executable_connector = ExecutableConnector(self.backup_configuration)
 
     #
-    # Scheduling methods.
+    # Listing methods.
     #
 
     def existing_backups_for_fileset(self, fileset, is_full):
+        """Retrieve list of existing backups for a single fileset."""
         existing_blobs_dict = dict()
         marker = None
         while True:
@@ -39,7 +40,7 @@ class BackupAgent(object):
             for blob in results:
                 blob_name = blob.name
                 parts = Naming.parse_blobname(blob_name)
-                if parts == None:
+                if parts is None:
                     continue
 
                 end_time_of_existing_blob = parts[3]
@@ -53,7 +54,8 @@ class BackupAgent(object):
                 break
         return existing_blobs_dict
 
-    def existing_backups(self, filesets=[]):
+    def existing_backups(self, filesets=None):
+        """Retrieve list of existing backups."""
         existing_blobs_dict = dict()
         marker = None
         while True:
@@ -64,11 +66,13 @@ class BackupAgent(object):
             for blob in results:
                 blob_name = blob.name
                 parts = Naming.parse_blobname(blob_name)
-                if parts == None:
+                if parts is None:
                     continue
 
-                (dbname_of_existing_blob, _is_full, _start_timestamp, end_time_of_existing_blob, _stripe_index, _stripe_count) = parts
-                if len(filesets) == 0 or dbname_of_existing_blob in filesets:
+                (fileset_of_existing_blob, _is_full,
+                 _start_timestamp, end_time_of_existing_blob) = parts
+
+                if not filesets or fileset_of_existing_blob in filesets:
                     if not existing_blobs_dict.has_key(end_time_of_existing_blob):
                         existing_blobs_dict[end_time_of_existing_blob] = []
                     existing_blobs_dict[end_time_of_existing_blob].append(blob_name)
@@ -79,9 +83,14 @@ class BackupAgent(object):
                 break
         return existing_blobs_dict
 
+    #
+    # Scheduling methods.
+    #
+
     def latest_backup_timestamp(self, fileset, is_full):
+        """Return the timestamp for the latest backup for a given fileset."""
         existing_blobs_dict = self.existing_backups_for_fileset(fileset=fileset, is_full=is_full)
-        if len(existing_blobs_dict.keys()) == 0:
+        if not existing_blobs_dict.keys():
             return "19000101_000000"
         return Timing.sort(existing_blobs_dict.keys())[-1:][0]
 
@@ -263,36 +272,21 @@ class BackupAgent(object):
         return new_blob_name
 
     #
-    # Other commands. (TBD)
+    # Other commands.
     #
 
-    def list_backups(self, filesets = []):
-        baks_dict = self.existing_backups(filesets=filesets)
-        for end_timestamp in baks_dict.keys():
-            # http://mark-dot-net.blogspot.com/2014/03/python-equivalents-of-linq-methods.html
-            stripes = baks_dict[end_timestamp]
-            stripes = map(lambda blobname: {
-                    "blobname":blobname,
-                    "filename": Naming.blobname_to_filename(blobname),
-                    "parts": Naming.parse_blobname(blobname)
-                }, stripes)
-            stripes = map(lambda x: {
-                    "blobname": x["blobname"],
-                    "filename": x["filename"],
-                    "parts": x["parts"],
-                    "dbname": x["parts"][0],
-                    "is_full": x["parts"][1],
-                    "begin": x["parts"][2],
-                    "end": x["parts"][3],
-                    "stripe_index": x["parts"][4],
-                }, stripes)
-
-            group_by_key=lambda x: "db {dbname: <30} start {begin} end {end} ({type})".format(
-                dbname=x["dbname"], end=x["end"], begin=x["begin"], type=Naming.backup_type_str(x["is_full"]))
-
-            for group, values in groupby(stripes, key=group_by_key): 
-                files = list(map(lambda s: s["stripe_index"], values))
-                print("{backup} {files}".format(backup=group, files=files))
+    def list_backups(self, filesets=None):
+        """List backups."""
+        baks_dict = self.existing_backups(filesets=filesets or [])
+        for end_timestamp in baks_dict:
+            blobname = baks_dict[end_timestamp][0]
+            #filename = Naming.blobname_to_filename(blobname)
+            parts = Naming.parse_blobname(blobname)
+            print "db {dbname: <30} start {begin} end {end} ({type})".format(
+                dbname=parts[0],
+                end=parts[3],
+                begin=parts[2],
+                type=Naming.backup_type_str(parts[1]))
 
     def prune_old_backups(self, older_than, databases):
         """

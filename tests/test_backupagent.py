@@ -42,6 +42,28 @@ class TestBackupAgent(unittest.TestCase):
         container = self.cfg.azure_storage_container_name
         self.assertTrue(self.cfg.storage_client.exists(container, blob))
 
+    def test_existing_backups(self):
+        """Test list of existing backups."""
+        # This test assumes that there are some existing backups for tmp_dir
+        # and for no other fileset.
+        backups_one = self.agent.existing_backups(['tmp_dir'])
+        self.assertGreater(len(backups_one.keys()), 0)
+        backups_all = self.agent.existing_backups([])
+        self.assertGreater(len(backups_all.keys()), 0)
+        # Non-existing fileset
+        backups_none = self.agent.existing_backups(['XXX'])
+        self.assertEquals(len(backups_none.keys()), 0)
+
+    def test_list_backups(self):
+        """Test list of existing backups."""
+        # This test assumes that there are some existing backups for tmp_dir
+        # and for no other fileset.
+        self.agent.list_backups(['tmp_dir'])
+        self.agent.list_backups([])
+        # Non-existing fileset
+        self.agent.list_backups(['XXX'])
+        return True
+
     def tearDown(self):
         self.patcher1.stop()
 
