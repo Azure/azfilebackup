@@ -21,3 +21,11 @@ steps:
   - script: python setup.py test
     displayName: 'Run tests'
 
+  - script: 'python setup.py sdist'
+    displayName: 'Build sdist'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish artifact: dist'
+    inputs:
+      pathtoPublish: 'dist'
+      artifactName: 'dist'
