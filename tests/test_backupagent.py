@@ -5,6 +5,8 @@ from mock import patch
 from azfilebak import backupconfiguration
 from azfilebak import backupagent
 from azfilebak.azurevminstancemetadata import AzureVMInstanceMetadata
+from azfilebak.businesshours import BusinessHours
+from azfilebak.scheduleparser import ScheduleParser
 
 class TestBackupAgent(unittest.TestCase):
     """Unit tests for class BackupAgent."""
@@ -33,6 +35,112 @@ class TestBackupAgent(unittest.TestCase):
 
         self.cfg = backupconfiguration.BackupConfiguration(config_filename="config.txt")
         self.agent = backupagent.BackupAgent(self.cfg)
+
+    def test_should_run_full_backup(self):
+        """Test should_run_full_backup"""
+        sample_data = (
+            "db_backup_window_1:111111 111000 000000 011111;"
+            "db_backup_window_2:111111 111000 000000 011111;"
+            "db_backup_window_3:111111 111000 000000 011111;"
+            "db_backup_window_4:111111 111000 000000 011111;"
+            "db_backup_window_5:111111 111000 000000 011111;"
+            "db_backup_window_6:111111 111111 111111 111111;"
+            "db_backup_window_7:111111 111111 111111 111111"
+            )
+
+        business_hours = BusinessHours.parse_tag_str(sample_data)
+        db_backup_interval_min = ScheduleParser.parse_timedelta("24h")
+        db_backup_interval_max = ScheduleParser.parse_timedelta("3d")
+        five_day_backup = "20180601_010000"
+        two_day_backup = "20180604_010000"
+        same_day_backup = "20180606_010000"
+        during_business_hours = "20180606_150000"
+        outside_business_hours = "20180606_220000"
+
+        # Forced
+        self.assertTrue(self.agent.should_run_full_backup(
+            now_time=during_business_hours, force=True,
+            latest_full_backup_timestamp=same_day_backup,
+            business_hours=business_hours,
+            db_backup_interval_min=db_backup_interval_min,
+            db_backup_interval_max=db_backup_interval_max))
+        # Forced
+        self.assertTrue(self.agent.should_run_full_backup(
+            now_time=during_business_hours, force=True,
+            latest_full_backup_timestamp=two_day_backup,
+            business_hours=business_hours,
+            db_backup_interval_min=db_backup_interval_min,
+            db_backup_interval_max=db_backup_interval_max))
+        # Forced
+        self.assertTrue(self.agent.should_run_full_backup(
+            now_time=during_business_hours, force=True,
+            latest_full_backup_timestamp=five_day_backup,
+            business_hours=business_hours,
+            db_backup_interval_min=db_backup_interval_min,
+            db_backup_interval_max=db_backup_interval_max))
+        # respecting business hours, and not needed anyway
+        self.assertFalse(self.agent.should_run_full_backup(
+            now_time=during_business_hours, force=False,
+            latest_full_backup_timestamp=same_day_backup,
+            business_hours=business_hours,
+            db_backup_interval_min=db_backup_interval_min,
+            db_backup_interval_max=db_backup_interval_max))
+        # respecting business hours
+        self.assertFalse(self.agent.should_run_full_backup(
+            now_time=during_business_hours, force=False,
+            latest_full_backup_timestamp=two_day_backup,
+            business_hours=business_hours,
+            db_backup_interval_min=db_backup_interval_min,
+            db_backup_interval_max=db_backup_interval_max))
+        # a really old backup, so we ignore business hours
+        self.assertTrue(self.agent.should_run_full_backup(
+            now_time=during_business_hours, force=False,
+            latest_full_backup_timestamp=five_day_backup,
+            business_hours=business_hours,
+            db_backup_interval_min=db_backup_interval_min,
+            db_backup_interval_max=db_backup_interval_max))
+        # outside_business_hours, but same_day_backup, so no backup
+        self.assertFalse(self.agent.should_run_full_backup(
+            now_time=outside_business_hours, force=False,
+            latest_full_backup_timestamp=same_day_backup,
+            business_hours=business_hours,
+            db_backup_interval_min=db_backup_interval_min,
+            db_backup_interval_max=db_backup_interval_max))
+        # outside_business_hours and need to backup
+        self.assertTrue(self.agent.should_run_full_backup(
+            now_time=outside_business_hours, force=False,
+            latest_full_backup_timestamp=two_day_backup,
+            business_hours=business_hours,
+            db_backup_interval_min=db_backup_interval_min,
+            db_backup_interval_max=db_backup_interval_max))
+        # a really old backup
+        self.assertTrue(self.agent.should_run_full_backup(
+            now_time=outside_business_hours, force=False,
+            latest_full_backup_timestamp=five_day_backup,
+            business_hours=business_hours,
+            db_backup_interval_min=db_backup_interval_min,
+            db_backup_interval_max=db_backup_interval_max))
+        # Forced
+        self.assertTrue(self.agent.should_run_full_backup(
+            now_time=outside_business_hours, force=True,
+            latest_full_backup_timestamp=same_day_backup,
+            business_hours=business_hours,
+            db_backup_interval_min=db_backup_interval_min,
+            db_backup_interval_max=db_backup_interval_max))
+        # Forced
+        self.assertTrue(self.agent.should_run_full_backup(
+            now_time=outside_business_hours, force=True,
+            latest_full_backup_timestamp=two_day_backup,
+            business_hours=business_hours,
+            db_backup_interval_min=db_backup_interval_min,
+            db_backup_interval_max=db_backup_interval_max))
+        # Forced
+        self.assertTrue(self.agent.should_run_full_backup(
+            now_time=outside_business_hours, force=True,
+            latest_full_backup_timestamp=five_day_backup,
+            business_hours=business_hours,
+            db_backup_interval_min=db_backup_interval_min,
+            db_backup_interval_max=db_backup_interval_max))
 
     def test_backup_single_fileset(self):
         """Test backup single fileset."""
