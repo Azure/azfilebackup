@@ -16,6 +16,6 @@ def load_tests(loader, tests, ignore):
     tests.addTests(doctest.DocTestSuite(businesshours))
     tests.addTests(doctest.DocTestSuite(naming))
     tests.addTests(doctest.DocTestSuite(scheduleparser))
-    #tests.addTests(doctest.DocTestSuite(timing))
+    tests.addTests(doctest.DocTestSuite(timing))
     tests.addTests(doctest.DocTestSuite(backupagent))
     return tests
