@@ -133,12 +133,17 @@ class TestTiming(unittest.TestCase):
             ['20180101_010000', '20180101_010000', '20180101_010000', '20180101_011000', '20180101_012000', '20180101_013000', '20180101_014000', '20180101_014000', '20180101_014000', '20180101_015000', '20180101_020000', '20180101_021000', '20180101_021000', '20180101_022000', '20180101_022000', '20180101_022000', '20180101_023000', '20180101_024000', '20180101_025000', '20180101_030000', '20180101_030000', '20180101_030000', '20180101_031000', '20180101_032000', '20180101_032000', '20180101_033000'])
 
     def test_files_needed_for_recovery(self):
-        return True
         """Test files_needed_for_recovery."""
         times = self.__recovery_sample_data()
         self.assertEqual(
             Timing.files_needed_for_recovery(times=times, restore_point='20180101_023200'),
-            [{'is_full': False, 'stripe_index': 1, 'end_date': '20180101_023000', 'stripe_count': 1}, {'is_full': False, 'stripe_index': 1, 'end_date': '20180101_024000', 'stripe_count': 1}, {'is_full': True, 'stripe_index': 1, 'end_date': '20180101_022000', 'stripe_count': 3}, {'is_full': True, 'stripe_index': 2, 'end_date': '20180101_022000', 'stripe_count': 3}, {'is_full': True, 'stripe_index': 3, 'end_date': '20180101_022000', 'stripe_count': 3}])
+            [
+                {'is_full': True, 'stripe_index': 1, 'end_date': '20180101_022000', 'stripe_count': 3},
+                {'is_full': True, 'stripe_index': 2, 'end_date': '20180101_022000', 'stripe_count': 3},
+                {'is_full': True, 'stripe_index': 3, 'end_date': '20180101_022000', 'stripe_count': 3},
+                {'is_full': False, 'stripe_index': 1, 'end_date': '20180101_023000', 'stripe_count': 1},
+                {'is_full': False, 'stripe_index': 1, 'end_date': '20180101_024000', 'stripe_count': 1}
+            ])
 
 if __name__ == '__main__':
     unittest.main()
