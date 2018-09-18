@@ -62,6 +62,10 @@ class Runner(object):
 
         options.add_argument("-F", "--fileset", help="Select fileset(s) to backup or restore ('--fileset A,B,C')")
 
+        options.add_argument("-s", "--stream",
+                             help="Stream restore data to stdout",
+                             action="store_true")
+
         options.add_argument("-o",  "--output-dir", help="Specify target folder for backup files")
 
         return parser
@@ -184,8 +188,7 @@ class Runner(object):
                 Timing.parse(args.restore)
             except Exception:
                 raise BackupException("Cannot parse restore point \"{}\"".format(args.restore))
-
-            backup_agent.restore(restore_point=args.restore, output_dir=output_dir, filesets=filesets)
+            backup_agent.restore(restore_point=args.restore, output_dir=output_dir, filesets=filesets, stream=args.stream)
         elif args.list_backups:
             backup_agent.list_backups(filesets=filesets)
         elif args.prune_old_backups:

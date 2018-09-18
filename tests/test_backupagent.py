@@ -172,6 +172,13 @@ class TestBackupAgent(unittest.TestCase):
         self.agent.list_backups(['XXX'])
         return True
 
+    def test_restore_single_fileset(self):
+        """Test restoring a single fileset."""
+        # We should have a backup from the preceding test cases.
+        self.agent.restore_single_fileset('tmp_dir', '20180917_132700', '/tmp')
+        # Test that expected files were indeed restored...
+        return True
+
     def tearDown(self):
         self.patcher1.stop()
 

@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import sys
 import logging
 import os
 import datetime
@@ -225,7 +226,7 @@ class BackupAgent(object):
         return new_blob_name
 
     #
-    # Other commands.
+    # List methods.
     #
 
     def list_backups(self, filesets=None):
@@ -240,6 +241,10 @@ class BackupAgent(object):
                 end=parts[3],
                 begin=parts[2],
                 type=Naming.backup_type_str(parts[1]))
+
+    #
+    # Prune methods.
+    #
 
     def prune_old_backups(self, older_than, databases):
         """
@@ -282,54 +287,63 @@ class BackupAgent(object):
             else:
                 break
 
-    def restore(self, restore_point, output_dir, databases):
-        print("Retriving point-in-time restore {} for databases {}".format(restore_point, str(databases)))
-        databases = self.executable_connector.determine_databases(user_selected_databases=databases, is_full=True)
-        skip_dbs = self.backup_configuration.get_databases_to_skip()
-        databases = filter(lambda db: not (db in skip_dbs), databases)
-        for dbname in databases:
-            self.restore_single_db(dbname=dbname, output_dir=output_dir, restore_point=restore_point)
+    #
+    # Restore methods.
+    #
 
-    def restore_single_db(self, dbname, restore_point, output_dir):
-        blobs = self.list_restore_blobs(dbname=dbname)
+    def restore(self, restore_point, output_dir, filesets, stream=False):
+        """ Restore backups."""
+        logging.info("Retriving point-in-time restore %s for filesets %s",
+                     restore_point, str(filesets))
+        for fileset in filesets:
+            self.restore_single_fileset(fileset=fileset,
+                                        output_dir=output_dir,
+                                        restore_point=restore_point,
+                                        stream=stream)
+
+    def restore_single_fileset(self, fileset, restore_point, output_dir, stream=False):
+        """ Restore backup for a single fileset."""
+        blobs = self.list_restore_blobs(fileset=fileset)
         times = map(Naming.parse_blobname, blobs)
-        restore_files = Timing.files_needed_for_recovery(times, restore_point, 
+        restore_files = Timing.files_needed_for_recovery(
+            times, restore_point,
             select_end_date=lambda x: x[3], select_is_full=lambda x: x[1])
 
         storage_client = self.backup_configuration.storage_client
-        for (dbname, is_full, start_timestamp, end_timestamp, stripe_index, stripe_count) in restore_files:
-            if is_full:
-                # For full database files, download the SQL description
-                ddlgen_file_name=Naming.construct_ddlgen_name(dbname=dbname, start_timestamp=start_timestamp)
-                ddlgen_file_path=os.path.join(output_dir, ddlgen_file_name)
-                if storage_client.exists(container_name=self.backup_configuration.azure_storage_container_name, blob_name=ddlgen_file_name):
-                    storage_client.get_blob_to_path(
-                        container_name=self.backup_configuration.azure_storage_container_name,
-                        blob_name=ddlgen_file_name, file_path=ddlgen_file_path)
-                    out("Downloaded ddlgen description {}".format(ddlgen_file_path))
-
-            blob_name = "{dbname}_{type}_{start}--{end}_S{idx:03d}-{cnt:03d}.cdmp".format(
-                dbname=dbname, type=Naming.backup_type_str(is_full), 
-                start=start_timestamp, end=end_timestamp,
-                idx=stripe_index, cnt=stripe_count)
-            file_name = "{dbname}_{type}_{start}_S{idx:03d}-{cnt:03d}.cdmp".format(
-                dbname=dbname, type=Naming.backup_type_str(is_full), 
-                start=start_timestamp, idx=stripe_index, cnt=stripe_count)
-
+        for (fileset, is_full, start_timestamp, end_timestamp) in restore_files:
+            blob_name = "{fileset}_{type}_{start}--{end}.tar.gz".format(
+                fileset=fileset, type=Naming.backup_type_str(is_full),
+                start=start_timestamp, end=end_timestamp)
+            file_name = "{fileset}_{type}_{start}.tar.gz".format(
+                fileset=fileset, type=Naming.backup_type_str(is_full),
+                start=start_timestamp)
             file_path = os.path.join(output_dir, file_name)
-            storage_client.get_blob_to_path(
-                container_name=self.backup_configuration.azure_storage_container_name,
-                blob_name=blob_name,
-                file_path=file_path)
-            out("Downloaded dump {}".format(file_path))
 
-    def list_restore_blobs(self, dbname):
+            if stream:
+                storage_client.get_blob_to_stream(
+                    container_name=self.backup_configuration.azure_storage_container_name,
+                    blob_name=blob_name,
+                    stream=sys.stdout,
+                    max_connections=1
+                )
+            else:
+                storage_client.get_blob_to_path(
+                    container_name=self.backup_configuration.azure_storage_container_name,
+                    blob_name=blob_name,
+                    file_path=file_path,
+                    max_connections=1
+                )
+
+            logging.debug("Downloaded dump %s", file_path)
+
+    def list_restore_blobs(self, fileset):
+        """Determine list of blobs needed to restore a backup."""
         existing_blobs = []
         marker = None
         while True:
             results = self.backup_configuration.storage_client.list_blobs(
                 container_name=self.backup_configuration.azure_storage_container_name,
-                prefix="{dbname}_".format(dbname=dbname), 
+                prefix="{fileset}_".format(fileset=fileset),
                 marker=marker)
             for blob in results:
                 existing_blobs.append(blob.name)
@@ -337,10 +351,8 @@ class BackupAgent(object):
                 marker = results.next_marker
             else:
                 break
-        #
-        # restrict to dump files
-        #
-        return filter(lambda x: x.endswith(".cdmp"), existing_blobs)
+        # Keep tar files
+        return [b for b in existing_blobs if b.endswith('.tar.gz')]
 
     #
     # Configuration commands.
