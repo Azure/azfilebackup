@@ -42,12 +42,10 @@ class BackupAgent(object):
                 parts = Naming.parse_blobname(blob_name)
                 if parts is None:
                     continue
-
-                end_time_of_existing_blob = parts[3]
-                if not existing_blobs_dict.has_key(end_time_of_existing_blob):
-                    existing_blobs_dict[end_time_of_existing_blob] = []
-                existing_blobs_dict[end_time_of_existing_blob].append(blob_name)
-
+                start_timestamp = parts[2]
+                if not existing_blobs_dict.has_key(start_timestamp):
+                    existing_blobs_dict[start_timestamp] = []
+                existing_blobs_dict[start_timestamp].append(blob_name)
             if results.next_marker:
                 marker = results.next_marker
             else:
@@ -70,12 +68,12 @@ class BackupAgent(object):
                     continue
 
                 (fileset_of_existing_blob, _is_full,
-                 _start_timestamp, end_time_of_existing_blob) = parts
+                 start_timestamp) = parts
 
                 if not filesets or fileset_of_existing_blob in filesets:
-                    if not existing_blobs_dict.has_key(end_time_of_existing_blob):
-                        existing_blobs_dict[end_time_of_existing_blob] = []
-                    existing_blobs_dict[end_time_of_existing_blob].append(blob_name)
+                    if not existing_blobs_dict.has_key(start_timestamp):
+                        existing_blobs_dict[start_timestamp] = []
+                    existing_blobs_dict[start_timestamp].append(blob_name)
 
             if results.next_marker:
                 marker = results.next_marker
@@ -177,8 +175,7 @@ class BackupAgent(object):
         # Name of the backup blob
         blob_name = Naming.construct_blobname(fileset=fileset,
                                               is_full=is_full,
-                                              start_timestamp=start_timestamp,
-                                              end_timestamp='temp')
+                                              start_timestamp=start_timestamp)
 
         try:
             # Run the backup command
@@ -198,16 +195,13 @@ class BackupAgent(object):
             storage_client.delete_container(container_name=temp_container_name)
             raise ex
 
-        end_timestamp = Timing.now_localtime()
-
         # Rename the backup blob:
         # - copy from temp_container_name/old_blob_name to dest_container_name/new_blob_name)
         # - delete temp_container_name
 
         new_blob_name = Naming.construct_blobname(fileset=fileset,
                                                   is_full=is_full,
-                                                  start_timestamp=start_timestamp,
-                                                  end_timestamp=end_timestamp)
+                                                  start_timestamp=start_timestamp)
         copy_source = storage_client.make_blob_url(temp_container_name, blob_name)
         copy = storage_client.copy_blob(dest_container_name, new_blob_name, copy_source=copy_source)
 
@@ -232,13 +226,12 @@ class BackupAgent(object):
     def list_backups(self, filesets=None):
         """Print a list of existing backups."""
         baks_dict = self.existing_backups(filesets=filesets or [])
-        for end_timestamp in baks_dict:
-            blobname = baks_dict[end_timestamp][0]
+        for timestamp in baks_dict:
+            blobname = baks_dict[timestamp][0]
             #filename = Naming.blobname_to_filename(blobname)
             parts = Naming.parse_blobname(blobname)
-            print "db {dbname: <30} start {begin} end {end} ({type})".format(
+            print "db {dbname: <30} start {begin} ({type})".format(
                 dbname=parts[0],
-                end=parts[3],
                 begin=parts[2],
                 type=Naming.backup_type_str(parts[1]))
 
@@ -306,14 +299,13 @@ class BackupAgent(object):
         blobs = self.list_restore_blobs(fileset=fileset)
         times = map(Naming.parse_blobname, blobs)
         restore_files = Timing.files_needed_for_recovery(
-            times, restore_point,
-            select_end_date=lambda x: x[3], select_is_full=lambda x: x[1])
+            times, restore_point)
 
         storage_client = self.backup_configuration.storage_client
-        for (fileset, is_full, start_timestamp, end_timestamp) in restore_files:
-            blob_name = "{fileset}_{type}_{start}--{end}.tar.gz".format(
+        for (fileset, is_full, start_timestamp) in restore_files:
+            blob_name = "{fileset}_{type}_{start}.tar.gz".format(
                 fileset=fileset, type=Naming.backup_type_str(is_full),
-                start=start_timestamp, end=end_timestamp)
+                start=start_timestamp)
             file_name = "{fileset}_{type}_{start}.tar.gz".format(
                 fileset=fileset, type=Naming.backup_type_str(is_full),
                 start=start_timestamp)

@@ -7,6 +7,7 @@ from azfilebak import backupagent
 from azfilebak.azurevminstancemetadata import AzureVMInstanceMetadata
 from azfilebak.businesshours import BusinessHours
 from azfilebak.scheduleparser import ScheduleParser
+from azfilebak.naming import Naming
 
 class TestBackupAgent(unittest.TestCase):
     """Unit tests for class BackupAgent."""
@@ -175,7 +176,10 @@ class TestBackupAgent(unittest.TestCase):
     def test_restore_single_fileset(self):
         """Test restoring a single fileset."""
         # We should have a backup from the preceding test cases.
-        self.agent.restore_single_fileset('tmp_dir', '20180917_132700', '/tmp')
+        backups = self.agent.existing_backups_for_fileset('tmp_dir', True)
+        blob_name = backups.popitem()[1][0]
+        (fileset, _is_full, timestamp) = Naming.parse_blobname(blob_name)
+        self.agent.restore_single_fileset(fileset, timestamp, '/tmp')
         # Test that expected files were indeed restored...
         return True
 
