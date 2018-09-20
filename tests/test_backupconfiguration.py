@@ -35,10 +35,6 @@ class TestBackupConfiguration(unittest.TestCase):
         """test cfg_file_value"""
         self.assertEqual(self.cfg.cfg_file_value('local_temp_directory'), '/tmp')
 
-    def test_get_value(self):
-        """test get_value"""
-        self.assertEqual(self.cfg.get_value('vm_name'), 'somevm')
-
     def test_get_vm_name(self):
         """test get_vm_name"""
         self.assertEqual(self.cfg.get_vm_name(), 'somevm')

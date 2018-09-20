@@ -191,6 +191,12 @@ class TestBackupAgent(unittest.TestCase):
         # TODO: test the backup was effectively deleted
         return True
 
+    def test_show_configuration(self):
+        """Test show_configuration."""
+        conf = self.agent.show_configuration('/tmp')
+        print conf
+        return True
+
     def tearDown(self):
         self.patcher1.stop()
 
