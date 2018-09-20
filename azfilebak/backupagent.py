@@ -166,10 +166,7 @@ class BackupAgent(object):
             logging.warn("Skipping backup of fileset %s", fileset)
             return
 
-        # Create temporary container to hold the backup blob
-        temp_container_name = Naming.temp_container_name(fileset, start_timestamp)
         storage_client = self.backup_configuration.storage_client
-        storage_client.create_container(container_name=temp_container_name)
         # Final destination container 
         dest_container_name = self.backup_configuration.azure_storage_container_name
         # Name of the backup blob
@@ -184,40 +181,18 @@ class BackupAgent(object):
 
             # Stream backup command stdout to the blob
             storage_client.create_blob_from_stream(
-                container_name=temp_container_name,
+                container_name=dest_container_name,
                 blob_name=blob_name, stream=proc.stdout,
                 use_byte_buffer=True, max_connections=1)
 
             # Wait for the command to terminate
             proc.wait()
         except Exception as ex:
-            # Delete the temporary container
-            storage_client.delete_container(container_name=temp_container_name)
+            logging.warn("Failed to stream blob: %s", ex.message)
             raise ex
 
-        # Rename the backup blob:
-        # - copy from temp_container_name/old_blob_name to dest_container_name/new_blob_name)
-        # - delete temp_container_name
-
-        new_blob_name = Naming.construct_blobname(fileset=fileset,
-                                                  is_full=is_full,
-                                                  start_timestamp=start_timestamp)
-        copy_source = storage_client.make_blob_url(temp_container_name, blob_name)
-        copy = storage_client.copy_blob(dest_container_name, new_blob_name, copy_source=copy_source)
-
-        # Wait for copy to succeed
-        while copy.status != 'success':
-            logging.debug("Waiting for copy; status: %s", copy.status)
-            time.sleep(30)
-            copy = storage_client.get_blob_properties(
-                dest_container_name,
-                new_blob_name).properties.copy
-
-        # Delete sources
-        storage_client.delete_container(container_name=temp_container_name)
-
         # Return name of new blob
-        return new_blob_name
+        return blob_name
 
     #
     # List methods.
