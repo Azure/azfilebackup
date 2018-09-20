@@ -214,14 +214,14 @@ class BackupAgent(object):
     # Prune methods.
     #
 
-    def prune_old_backups(self, older_than, databases):
+    def prune_old_backups(self, older_than, filesets):
         """
-            Delete (prune) old backups from Azure storage. 
+        Delete (prune) old backups from Azure storage.
         """
         minimum_deletable_age = datetime.timedelta(7, 0)
-        logging.warn("Deleting files older than {}".format(older_than))
-        if (older_than < minimum_deletable_age):
-            msg="This script does not delete files younger than {}, ignoring this order".format(minimum_deletable_age)
+        logging.warn("Deleting files older than %s", older_than)
+        if older_than < minimum_deletable_age:
+            msg = "Will not delete files younger than {}, ignoring".format(minimum_deletable_age)
             logging.warn(msg)
             return
 
@@ -232,23 +232,23 @@ class BackupAgent(object):
                 marker=marker)
             for blob in results:
                 parts = Naming.parse_blobname(blob.name)
-                if (parts == None):
+                if parts is None:
                     continue
 
-                (dbname, _is_full, _start_timestamp, end_timestamp, _stripe_index, _stripe_count) = parts
-                if (databases != None) and not (dbname in databases):
+                (fileset, _is_full, start_timestamp) = parts
+                if (fileset != None) and not fileset in filesets:
                     continue
 
-                diff = Timing.time_diff(end_timestamp, Timing.now_localtime())
+                diff = Timing.time_diff(start_timestamp, Timing.now_localtime())
                 delete = diff > older_than
 
                 if delete:
-                    logging.warn("Deleting {}".format(blob.name))
+                    logging.warn("Deleting %s", blob.name)
                     self.backup_configuration.storage_client.delete_blob(
                         container_name=self.backup_configuration.azure_storage_container_name,
                         blob_name=blob.name)
                 else:
-                    logging.warn("Keeping {}".format(blob.name))
+                    logging.warn("Keeping %s", blob.name)
 
             if results.next_marker:
                 marker = results.next_marker

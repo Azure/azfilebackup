@@ -180,7 +180,15 @@ class TestBackupAgent(unittest.TestCase):
         blob_name = backups.popitem()[1][0]
         (fileset, _is_full, timestamp) = Naming.parse_blobname(blob_name)
         self.agent.restore_single_fileset(fileset, timestamp, '/tmp')
-        # Test that expected files were indeed restored...
+        # TODO: test that expected files were indeed restored...
+        return True
+
+    def test_prune_old_backups(self):
+        """Test prune_old_backups."""
+        # Delete backups older than 7 days
+        age = age = ScheduleParser.parse_timedelta('8d')
+        self.agent.prune_old_backups(age, ['tmp_dir'])
+        # TODO: test the backup was effectively deleted
         return True
 
     def tearDown(self):
