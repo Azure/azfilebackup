@@ -48,10 +48,3 @@ class Timing(object):
         3610
         """
         return int(Timing.time_diff(timestr_1, timestr_2).total_seconds())
-
-    @staticmethod
-    def files_needed_for_recovery(times, restore_point):
-        """Determine files needed for recovery based on the restore point."""
-        result = [f for f in times if f and f[2] == restore_point]
-        logging.debug("Files which must be fetched for %s: %s", restore_point, str(result))
-        return result

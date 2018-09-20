@@ -132,17 +132,5 @@ class TestTiming(unittest.TestCase):
             map(pick_start_date, Timing.sort(times=self.__recovery_sample_data(), selector=pick_start_date)),
             ['20180101_010000', '20180101_010000', '20180101_010000', '20180101_011000', '20180101_012000', '20180101_013000', '20180101_014000', '20180101_014000', '20180101_014000', '20180101_015000', '20180101_020000', '20180101_021000', '20180101_021000', '20180101_022000', '20180101_022000', '20180101_022000', '20180101_023000', '20180101_024000', '20180101_025000', '20180101_030000', '20180101_030000', '20180101_030000', '20180101_031000', '20180101_032000', '20180101_032000', '20180101_033000'])
 
-    def test_files_needed_for_recovery(self):
-        """Test files_needed_for_recovery."""
-        times = self.__recovery_sample_data()
-        times_list = [('foo', t['is_full'], t['start_date']) for t in times]
-        self.assertEqual(
-            Timing.files_needed_for_recovery(times=times_list, restore_point='20180101_022000'),
-            [
-                ('foo', True, '20180101_022000'),
-                ('foo', True, '20180101_022000'),
-                ('foo', True, '20180101_022000')
-            ])
-
 if __name__ == '__main__':
     unittest.main()
