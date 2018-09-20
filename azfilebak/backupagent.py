@@ -271,37 +271,29 @@ class BackupAgent(object):
 
     def restore_single_fileset(self, fileset, restore_point, output_dir, stream=False):
         """ Restore backup for a single fileset."""
-        blobs = self.list_restore_blobs(fileset=fileset)
-        times = map(Naming.parse_blobname, blobs)
-        restore_files = Timing.files_needed_for_recovery(
-            times, restore_point)
-
+        
+        blob_to_restore = Naming.construct_blobname(fileset, True, restore_point)
+        file_name = Naming.construct_filename(fileset, True, restore_point)
+        file_path = os.path.join(output_dir, file_name)
+        
         storage_client = self.backup_configuration.storage_client
-        for (fileset, is_full, start_timestamp) in restore_files:
-            blob_name = "{fileset}_{type}_{start}.tar.gz".format(
-                fileset=fileset, type=Naming.backup_type_str(is_full),
-                start=start_timestamp)
-            file_name = "{fileset}_{type}_{start}.tar.gz".format(
-                fileset=fileset, type=Naming.backup_type_str(is_full),
-                start=start_timestamp)
-            file_path = os.path.join(output_dir, file_name)
 
-            if stream:
-                storage_client.get_blob_to_stream(
-                    container_name=self.backup_configuration.azure_storage_container_name,
-                    blob_name=blob_name,
-                    stream=sys.stdout,
-                    max_connections=1
-                )
-            else:
-                storage_client.get_blob_to_path(
-                    container_name=self.backup_configuration.azure_storage_container_name,
-                    blob_name=blob_name,
-                    file_path=file_path,
-                    max_connections=1
-                )
+        if stream:
+            storage_client.get_blob_to_stream(
+                container_name=self.backup_configuration.azure_storage_container_name,
+                blob_name=blob_to_restore,
+                stream=sys.stdout,
+                max_connections=1
+            )
+        else:
+            storage_client.get_blob_to_path(
+                container_name=self.backup_configuration.azure_storage_container_name,
+                blob_name=blob_to_restore,
+                file_path=file_path,
+                max_connections=1
+            )
 
-            logging.debug("Downloaded dump %s", file_path)
+        logging.debug("Downloaded dump %s", file_path)
 
     def list_restore_blobs(self, fileset):
         """Determine list of blobs needed to restore a backup."""
