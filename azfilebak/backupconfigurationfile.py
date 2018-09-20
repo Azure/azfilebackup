@@ -35,7 +35,7 @@ class BackupConfigurationFile(object):
         """
         Parse a configuration file and return a dictionary of key/values.
 
-        >>> values = BackupConfigurationFile.read_key_value_file(filename="config.txt")
+        >>> values = BackupConfigurationFile.read_key_value_file(filename="sample_backup.conf")
         >>> values["local_temp_directory"]
         '/tmp'
         """
@@ -44,5 +44,5 @@ class BackupConfigurationFile(object):
             lines = config_file.readlines()
             # skip comments and empty lines
             content_lines = [line for line in lines if not re.match(r"^\s*#|^\s*$", line)]
-            content = dict(line.split(":", 1) for line in content_lines)
-            return dict([(x[0].strip(), x[1].strip()) for x in content.iteritems()])
+            content = dict(re.split(":|=", line) for line in content_lines)
+            return dict([(x[0].strip(), x[1].strip().strip('\"')) for x in content.iteritems()])

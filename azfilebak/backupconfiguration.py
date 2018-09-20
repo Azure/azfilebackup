@@ -116,12 +116,12 @@ class BackupConfiguration(object):
 
     def get_azure_storage_account_name(self):
         """Get storage account name."""
-        return self.cfg_file_value("azure.storage.account_name")
+        return self.cfg_file_value("azure.blob.account_name")
 
     @property
     def azure_storage_container_name(self):
         """Get storage container name."""
-        return self.cfg_file_value("azure.storage.container_name")
+        return self.cfg_file_value("azure.blob.container_name")
 
     # The storage client is exposed as a property of the configuration.
 

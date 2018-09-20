@@ -34,7 +34,7 @@ class TestBackupAgent(unittest.TestCase):
                               return_value=self.meta)
         self.patcher1.start()
 
-        self.cfg = backupconfiguration.BackupConfiguration(config_filename="config.txt")
+        self.cfg = backupconfiguration.BackupConfiguration(config_filename="sample_backup.conf")
         self.agent = backupagent.BackupAgent(self.cfg)
 
     def test_should_run_full_backup(self):

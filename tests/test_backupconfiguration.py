@@ -29,7 +29,7 @@ class TestBackupConfiguration(unittest.TestCase):
                               return_value=self.meta)
         self.patcher1.start()
 
-        self.cfg = BackupConfiguration(config_filename="config.txt")
+        self.cfg = BackupConfiguration(config_filename="sample_backup.conf")
 
     def test_cfg_file_value(self):
         """test cfg_file_value"""
@@ -51,7 +51,7 @@ class TestBackupConfiguration(unittest.TestCase):
         """test get_commandline"""
         self.assertEqual(self.cfg.get_backup_command('tmp_dir'), 'tar cvzf - /tmp --ignore-failed-read')
         self.assertEqual(self.cfg.get_backup_command('osdisk'),
-                         'tar cvzf - / --exclude=/dev --exclude=/proc --exclude=/run --exclude=/sys')
+                         'tar cvzf - / --exclude /dev --exclude /proc --exclude /run --exclude /sys')
 
     def test_get_restore_command(self):
         """test get_commandline"""

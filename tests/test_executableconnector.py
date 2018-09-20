@@ -7,7 +7,7 @@ class TestExecutableConnector(unittest.TestCase):
     """Unit tests for class ExecutableConnector."""
 
     def setUp(self):
-        self.cfg = backupconfiguration.BackupConfiguration(config_filename="config.txt")
+        self.cfg = backupconfiguration.BackupConfiguration(config_filename="sample_backup.conf")
         self.connector = executableconnector.ExecutableConnector(self.cfg)
 
     def test_create_backup(self):
