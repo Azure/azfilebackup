@@ -30,6 +30,11 @@ class BackupConfigurationFile(object):
         values = BackupConfigurationFile.read_key_value_file(filename=self.filename)
         return [i for i in values.keys() if re.match(prefix, i)]
 
+    def key_exists(self, key):
+        """Return True if a key exists in the configuration file."""
+        values = BackupConfigurationFile.read_key_value_file(filename=self.filename)
+        return values.has_key(key)
+
     @staticmethod
     def read_key_value_file(filename):
         """

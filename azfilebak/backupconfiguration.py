@@ -135,8 +135,13 @@ class BackupConfiguration(object):
 
     @property
     def azure_storage_container_name(self):
-        """Get storage container name."""
-        return self.cfg_file_value("azure.blob.container_name")
+        """
+        Get storage container name. It can be specified explicitly in the
+        configuration file, otherwise will default to the VM name.
+        """
+        if self.cfg_file.key_exists('azure.blob.container_name'):
+            return self.cfg_file_value('azure.blob.container_name')
+        return self.get_vm_name()
 
     # The storage client is exposed as a property of the configuration.
 
