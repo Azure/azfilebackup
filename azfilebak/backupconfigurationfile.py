@@ -49,5 +49,5 @@ class BackupConfigurationFile(object):
             lines = config_file.readlines()
             # skip comments and empty lines
             content_lines = [line for line in lines if not re.match(r"^\s*#|^\s*$", line)]
-            content = dict(re.split(":|=", line) for line in content_lines)
+            content = dict(re.split(":|=", line, maxsplit=1) for line in content_lines)
             return dict([(x[0].strip(), x[1].strip().strip('\"')) for x in content.iteritems()])
