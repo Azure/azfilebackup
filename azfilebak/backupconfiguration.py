@@ -111,6 +111,21 @@ class BackupConfiguration(object):
         """Get temporary directory."""
         return self.cfg_file_value("local_temp_directory")
 
+    def get_default_fileset(self):
+        """Get the default fileset."""
+        dbtype = self.cfg_file_value("DEFAULT.dbtype").lower()
+        if dbtype != 'ase' and dbtype != 'hana':
+            return 'ci'
+        return dbtype
+
+    def get_fileset_sources(self, fileset):
+        """Get fileset sources."""
+        return self.cfg_file_value("fs.{}.sources".format(fileset))
+
+    def get_fileset_exclude(self, fileset):
+        """Get fileset sources."""
+        return self.cfg_file_value("fs.{}.exclude".format(fileset))
+
     # TODO: these values should be computed unless they are
     # overloaded using environment or config file or tag
 

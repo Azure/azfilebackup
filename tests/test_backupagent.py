@@ -197,6 +197,11 @@ class TestBackupAgent(unittest.TestCase):
         print conf
         return True
 
+    def test_backup_default(self):
+        """Test backup_default."""
+        self.agent.backup_default(True, True)
+        return True
+
     def tearDown(self):
         self.patcher1.stop()
 

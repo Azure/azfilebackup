@@ -152,13 +152,35 @@ class BackupAgent(object):
         """Backup a list of filesets."""
         filesets_to_backup = filesets
         if not filesets_to_backup:
-            filesets_to_backup = self.backup_configuration.get_filesets()
+            # If not fileset specified, determine the default backup configuration
+            self.backup_default(is_full, force)
+        else:
+            for fileset in filesets_to_backup:
+                self.backup_single_fileset(fileset=fileset, is_full=is_full, force=force)
 
+    def backup_default(self, is_full, force):
+        """Determine default backup configuration."""
+        fs = self.backup_configuration.get_default_fileset()
+        # Get the sources and exclude
+        sources = self.backup_configuration.get_fileset_sources(fs)
+        exclude = self.backup_configuration.get_fileset_exclude(fs)
+        # Assemble the tar command
+        command = self.executable_connector.assemble_backup_command(sources, exclude)
+        # Run it
+        self.backup_single_fileset(fs, is_full, force, command)
+        return
+
+    def backup_all_filesets(self, is_full, force):
+        """Backup all the filesets."""
+        filesets_to_backup = self.backup_configuration.get_filesets()
         for fileset in filesets_to_backup:
             self.backup_single_fileset(fileset=fileset, is_full=is_full, force=force)
 
-    def backup_single_fileset(self, fileset, is_full, force):
-        """Backup a single fileset."""
+    def backup_single_fileset(self, fileset, is_full, force, command=None):
+        """
+        Backup a single fileset using the specified command.
+        If no command is provided, it will be looked up in the config file.
+        """
         start_timestamp = Timing.now_localtime()
         if not self.should_run_backup(
                 fileset=fileset, is_full=is_full,
@@ -174,10 +196,14 @@ class BackupAgent(object):
                                               is_full=is_full,
                                               start_timestamp=start_timestamp)
 
+        # Command to run to execute the backup
+        if not command:
+            command = self.backup_configuration.get_backup_command(fileset)
+
         try:
             # Run the backup command
-            proc = self.executable_connector.create_backup(
-                fileset=fileset, is_full=is_full)
+            proc = self.executable_connector.run_backup_command(
+                command)
 
             # Stream backup command stdout to the blob
             storage_client.create_blob_from_stream(

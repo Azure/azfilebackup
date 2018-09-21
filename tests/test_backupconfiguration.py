@@ -65,6 +65,18 @@ class TestBackupConfiguration(unittest.TestCase):
         self.assertIn('osdisk', filesets)
         self.assertIn('testecho', filesets)
 
+    def test_get_fileset_sources(self):
+        """test get_fileset_sources"""
+        self.assertEqual(self.cfg.get_fileset_sources('ci'), '/tmp')
+        self.assertEqual(self.cfg.get_fileset_sources('hana'), '/tmp')
+        self.assertEqual(self.cfg.get_fileset_sources('ase'), '/tmp')
+
+    def test_get_fileset_exclude(self):
+        """test get_fileset_sources"""
+        self.assertEqual(self.cfg.get_fileset_exclude('ci'), '/install')
+        self.assertEqual(self.cfg.get_fileset_exclude('hana'), '/install,/hana/log/AZ3,/hana/data/AZ3,/hana_backup/AZ3/log,/hana_backup/AZ3/data')
+        self.assertEqual(self.cfg.get_fileset_exclude('ase'), '/install,/sybase/AZ3/saparch_1,/sybase/AZ3/sapdata_1,/sybase/AZ3/saplog_1,/sybase/AZ3/saptemp_1')
+
     def test_storage_client(self):
         """test storage_client"""
         if not os.environ.has_key('STORAGE_KEY'):

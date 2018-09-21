@@ -17,11 +17,17 @@ class ExecutableConnector(object):
     def __init__(self, backup_configuration):
         self.backup_configuration = backup_configuration
 
-    def create_backup(self, fileset, is_full):
-        """Create a backup for a given fileset."""
+    def assemble_backup_command(self, sources, exclude):
+        """Assemble backup command line from configuration."""
+        cmd = 'tar cpzf - --hard-dereference'
+        excludes = exclude.split(',')
+        for i in excludes:
+            cmd += ' --exclude ' + i
+        cmd += ' ' + sources
+        return cmd
 
-        # Determine command arguments from configuration
-        command = self.backup_configuration.get_backup_command(fileset)
+    def run_backup_command(self, command):
+        """Create a backup for a given fileset."""
         args = shlex.split(command)
 
         logging.debug("Executing %s", args[0])
