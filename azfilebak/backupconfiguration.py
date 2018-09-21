@@ -130,8 +130,17 @@ class BackupConfiguration(object):
     # overloaded using environment or config file or tag
 
     def get_azure_storage_account_name(self):
-        """Get storage account name."""
-        return self.cfg_file_value("azure.blob.account_name")
+        """
+        Get storage account name. It can be specified explicitly in a
+        instance metadata tag, otherwise is assembled using configuration
+        information.
+        """
+        #return self.cfg_file_value("azure.blob.account_name")
+        # TODO: check instane metadata tag
+        cid = self.cfg_file_value("DEFAULT.CID").lower()
+        name = self.get_vm_name()[0:5]
+        account = "sa{}{}backup0001".format(name, cid)
+        return account
 
     @property
     def azure_storage_container_name(self):

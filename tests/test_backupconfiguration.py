@@ -45,7 +45,7 @@ class TestBackupConfiguration(unittest.TestCase):
 
     def test_get_azure_storage_account_name(self):
         """test get_azure_storage_account_name"""
-        self.assertEqual(self.cfg.get_azure_storage_account_name(), 'testhecbackup')
+        self.assertEqual(self.cfg.get_azure_storage_account_name(), 'sasomevaz1backup0001')
 
     def test_get_backup_command(self):
         """test get_commandline"""
