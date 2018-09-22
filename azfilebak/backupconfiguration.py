@@ -90,19 +90,23 @@ class BackupConfiguration(object):
     def get_fs_backup_interval_min(self):
         """Get minimum backup interval."""
         return ScheduleParser.parse_timedelta(
-            self.instance_metadata_tag_value("fs_backup_interval_min")
+            BusinessHours(
+                self.instance_metadata.get_tags()
+            ).min
         )
 
     def get_fs_backup_interval_max(self):
         """Get maximum backup interval."""
         return ScheduleParser.parse_timedelta(
-            self.instance_metadata_tag_value("fs_backup_interval_max")
+            BusinessHours(
+                self.instance_metadata.get_tags()
+            ).max
         )
 
     def get_business_hours(self):
         """Get business hours."""
         return BusinessHours(
-            self.instance_metadata.get_tags(), prefix="db_backup_window"
+            self.instance_metadata.get_tags()
         )
 
     # These values come from the configuration file

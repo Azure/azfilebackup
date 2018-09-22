@@ -10,16 +10,7 @@ class TestBackupConfiguration(unittest.TestCase):
     """Unit tests for class BackupConfiguration."""
 
     def setUp(self):
-        self.json_meta = '{ "compute": { "subscriptionId": "724467b5-bee4-484b-bf13-d6a5505d2b51", \
-        "resourceGroupName": "backuptest", "name": "somevm", \
-        "tags":"fs_backup_interval_min:24h;fs_backup_interval_max:3d;\
-        db_backup_window_1:111111 111000 000000 011111;\
-        db_backup_window_2:111111 111000 000000 011111;\
-        db_backup_window_3:111111 111000 000000 011111;\
-        db_backup_window_4:111111 111000 000000 011111;\
-        db_backup_window_5:111111 111000 000000 011111;\
-        db_backup_window_6:111111 111111 111111 111111;\
-        db_backup_window_7:111111 111111 111111 111111" } }'
+        self.json_meta = open('sample_instance_metadata.json').read()
 
         self.meta = AzureVMInstanceMetadata(
             lambda: (json.JSONDecoder()).decode(self.json_meta)
@@ -37,15 +28,15 @@ class TestBackupConfiguration(unittest.TestCase):
 
     def test_get_vm_name(self):
         """test get_vm_name"""
-        self.assertEqual(self.cfg.get_vm_name(), 'somevm')
+        self.assertEqual(self.cfg.get_vm_name(), 'hec99v106014')
 
     def test_get_subscription_id(self):
         """test get_subscription_id"""
-        self.assertEqual(self.cfg.get_subscription_id(), '724467b5-bee4-484b-bf13-d6a5505d2b51')
+        self.assertEqual(self.cfg.get_subscription_id(), '2e394ee6-2714-4080-88c3-ecfc33d85147')
 
     def test_get_azure_storage_account_name(self):
         """test get_azure_storage_account_name"""
-        self.assertEqual(self.cfg.get_azure_storage_account_name(), 'sasomevaz1backup0001')
+        self.assertEqual(self.cfg.get_azure_storage_account_name(), 'sahec99az1backup0001')
 
     def test_get_backup_command(self):
         """test get_commandline"""

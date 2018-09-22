@@ -13,18 +13,7 @@ class TestBackupAgent(unittest.TestCase):
     """Unit tests for class BackupAgent."""
 
     def setUp(self):
-        self.json_meta = (
-            '{ "compute": { "subscriptionId": "724467b5-bee4-484b-bf13-d6a5505d2b51",'
-            '"resourceGroupName": "backuptest", "name": "somevm",'
-            '"tags":"fs_backup_interval_min:24h;fs_backup_interval_max:3d;'
-            'db_backup_window_1:111111 111000 000000 011111;'
-            'db_backup_window_2:111111 111000 000000 011111;'
-            'db_backup_window_3:111111 111000 000000 011111;'
-            'db_backup_window_4:111111 111000 000000 011111;'
-            'db_backup_window_5:111111 111000 000000 011111;'
-            'db_backup_window_6:111111 111111 111111 111111;'
-            'db_backup_window_7:111111 111111 111111 111111" } }'
-        )
+        self.json_meta = open('sample_instance_metadata.json').read()
 
         self.meta = AzureVMInstanceMetadata(
             lambda: (json.JSONDecoder()).decode(self.json_meta)
@@ -40,14 +29,17 @@ class TestBackupAgent(unittest.TestCase):
     def test_should_run_full_backup(self):
         """Test should_run_full_backup"""
         sample_data = (
-            "db_backup_window_1:111111 111000 000000 011111;"
-            "db_backup_window_2:111111 111000 000000 011111;"
-            "db_backup_window_3:111111 111000 000000 011111;"
-            "db_backup_window_4:111111 111000 000000 011111;"
-            "db_backup_window_5:111111 111000 000000 011111;"
-            "db_backup_window_6:111111 111111 111111 111111;"
-            "db_backup_window_7:111111 111111 111111 111111"
-            )
+            "bkp_fs_schedule:"
+            "mo:111111 111000 000000 011111, "
+            "tu:111111 111000 000000 011111, "
+            "we:111111 111000 000000 011111, "
+            "th:111111 111000 000000 011111, "
+            "fr:111111 111000 000000 011111, "
+            "sa:111111 111111 111111 111111, "
+            "su:111111 111111 111111 111111, "
+            "min:1d, "
+            "max:3d"
+        )
 
         business_hours = BusinessHours.parse_tag_str(sample_data)
         db_backup_interval_min = ScheduleParser.parse_timedelta("24h")
