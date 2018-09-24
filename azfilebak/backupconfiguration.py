@@ -2,13 +2,14 @@
 """BackupConfiguration module."""
 
 import os
+import logging
 from azure.storage.blob import BlockBlobService
 from msrestazure.azure_active_directory import MSIAuthentication
-from .azurevminstancemetadata import AzureVMInstanceMetadata
-from .backupconfigurationfile import BackupConfigurationFile
-from .businesshours import BusinessHours
-from .scheduleparser import ScheduleParser
-from .backupexception import BackupException
+from azfilebak.azurevminstancemetadata import AzureVMInstanceMetadata
+from azfilebak.backupconfigurationfile import BackupConfigurationFile
+from azfilebak.businesshours import BusinessHours
+from azfilebak.scheduleparser import ScheduleParser
+from azfilebak.backupexception import BackupException
 
 class BackupConfiguration(object):
     """Access configuration values."""
@@ -141,9 +142,14 @@ class BackupConfiguration(object):
         """
         #return self.cfg_file_value("azure.blob.account_name")
         # TODO: check instane metadata tag
-        cid = self.cfg_file_value("DEFAULT.CID").lower()
-        name = self.get_vm_name()[0:5]
-        account = "sa{}{}backup0001".format(name, cid)
+        try:
+            account = self.instance_metadata.get_tags()['StorageAccount']
+            logging.info("Using storage account name from instance metadata: %s", account)
+        except Exception as ex:
+            cid = self.cfg_file_value("DEFAULT.CID").lower()
+            name = self.get_vm_name()[0:5]
+            account = "sa{}{}backup0001".format(name, cid)
+            logging.info("No storage account in instance metadata, using generated: %s", account)
         return account
 
     @property
