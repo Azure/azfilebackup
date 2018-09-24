@@ -19,10 +19,22 @@ class ExecutableConnector(object):
 
     def assemble_backup_command(self, sources, exclude):
         """Assemble backup command line from configuration."""
+        # Base command
         cmd = 'tar cpzf - --hard-dereference'
+        # Add explicit excludes
         excludes = exclude.split(',')
         for i in excludes:
             cmd += ' --exclude ' + i
+        # Exclude /dev, /proc, /run, /sys
+        if '/dev' not in excludes:
+            cmd += ' --exclude /dev'
+        if '/proc' not in excludes:
+            cmd += ' --exclude /proc'
+        if '/run' not in excludes:
+            cmd += ' --exclude /run'
+        if '/sys' not in excludes:
+            cmd += ' --exclude /sys'
+        # Add the path to archive
         cmd += ' ' + sources
         return cmd
 

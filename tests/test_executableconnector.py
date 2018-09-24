@@ -21,9 +21,11 @@ class TestExecutableConnector(unittest.TestCase):
     def test_assemble_backup_command(self):
         """Test assemble_backup_command"""
         cmd = self.connector.assemble_backup_command('/', '/proc')
-        self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /proc /')
+        self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /proc --exclude /dev --exclude /run --exclude /sys /')
         cmd = self.connector.assemble_backup_command('/', '/proc,/dev')
-        self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /proc --exclude /dev /')
+        self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /proc --exclude /dev --exclude /run --exclude /sys /')
+        cmd = self.connector.assemble_backup_command('/', '/foo,/bar')
+        self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /foo --exclude /bar --exclude /dev --exclude /proc --exclude /run --exclude /sys /')
 
 if __name__ == '__main__':
     unittest.main()
