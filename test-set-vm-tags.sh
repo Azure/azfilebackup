@@ -1,15 +1,15 @@
 #!/bin/bash
 
-rg=backuptest
-vm_name=saphec7
+rg=test-backup
+vm_name=test-backup
 
 az vm update --resource-group "${rg}" --name "${vm_name}" --set \
-    tags.fs_backup_interval_min=1d \
-    tags.fs_backup_interval_max=3d \
-    tags.db_backup_window_1="111111 111000 000000 011111" \
-    tags.db_backup_window_2="111111 111000 000000 011111" \
-    tags.db_backup_window_3="111111 111000 000000 011111" \
-    tags.db_backup_window_4="111111 111000 000000 011111" \
-    tags.db_backup_window_5="111111 111000 000000 011111" \
-    tags.db_backup_window_6="111111 111111 111111 111111" \
-    tags.db_backup_window_7="111111 111111 111111 111111"
+    tags.InfrastructureProvider=GMPTIC \
+    tags.StorageAccount=sahec99az1backup0001 \
+    tags.Name=hec99v106014 \
+    tags.Serial=AFD83530-840D-11E8-9E6C-FC820C452436 \
+    tags.bkp_db_schedule="mo:111111111111111111111111, tu:111111111111111111111111, we:111111111111111111111111, th:111111111111111111111111, fr:111111111111111111111111, sa:111111111111111111111111, su:111111111111111111111111, min:1d, max:3d" \
+    tags.bkp_fs_schedule="mo:111111111111111111111111, tu:111111111111111111111111, we:111111111111111111111111, th:111111111111111111111111, fr:111111111111111111111111, sa:111111111111111111111111, su:111111111111111111111111, min:1d, max:3d" \
+    tags.bkp_log_schedule="mo:111111111111111111111111, tu:111111111111111111111111, we:111111111111111111111111, th:111111111111111111111111, fr:111111111111111111111111, sa:111111111111111111111111, su:111111111111111111111111, min:10m, max:30m" \
+    tags.db_backup_interval_max=3d \
+    tags.db_backup_interval_min=1d \
