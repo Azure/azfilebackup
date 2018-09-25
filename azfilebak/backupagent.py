@@ -54,32 +54,29 @@ class BackupAgent(object):
 
     def existing_backups(self, filesets=None):
         """Retrieve list of existing backups."""
-        existing_blobs_dict = dict()
+        existing_blobs_list = list()
         marker = None
-        while True:
-            results = self.backup_configuration.storage_client.list_blobs(
+
+        results = list(
+            self.backup_configuration.storage_client.list_blobs(
                 container_name=self.backup_configuration.azure_storage_container_name,
                 marker=marker)
+        )
 
-            for blob in results:
-                blob_name = blob.name
-                parts = Naming.parse_blobname(blob_name)
-                if parts is None:
-                    continue
+        results = sorted(results, key=lambda x: x.name)
 
-                (fileset_of_existing_blob, _is_full,
-                 start_timestamp) = parts
+        for blob in results:
+            blob_name = blob.name
+            parts = Naming.parse_blobname(blob_name)
+            if parts is None:
+                continue
 
-                if not filesets or fileset_of_existing_blob in filesets:
-                    if not existing_blobs_dict.has_key(start_timestamp):
-                        existing_blobs_dict[start_timestamp] = []
-                    existing_blobs_dict[start_timestamp].append(blob_name)
+            (fileset_of_existing_blob, _is_full, _start_timestamp) = parts
 
-            if results.next_marker:
-                marker = results.next_marker
-            else:
-                break
-        return existing_blobs_dict
+            if not filesets or fileset_of_existing_blob in filesets:
+                existing_blobs_list.append(blob_name)
+
+        return existing_blobs_list
 
     #
     # Scheduling methods.
@@ -226,13 +223,12 @@ class BackupAgent(object):
 
     def list_backups(self, filesets=None):
         """Print a list of existing backups."""
-        baks_dict = self.existing_backups(filesets=filesets or [])
-        for timestamp in baks_dict:
-            blobname = baks_dict[timestamp][0]
+        baks_list = self.existing_backups(filesets=filesets or [])
+        for blobname in baks_list:
             #filename = Naming.blobname_to_filename(blobname)
             parts = Naming.parse_blobname(blobname)
-            print "db {dbname: <30} start {begin} ({type})".format(
-                dbname=parts[0],
+            print "fs {fileset: <30} start {begin} ({type})".format(
+                fileset=parts[0],
                 begin=parts[2],
                 type=Naming.backup_type_str(parts[1]))
 

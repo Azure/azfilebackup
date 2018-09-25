@@ -148,12 +148,12 @@ class TestBackupAgent(unittest.TestCase):
         # This test assumes that there are some existing backups for tmp_dir
         # and for no other fileset.
         backups_one = self.agent.existing_backups(['tmp_dir'])
-        self.assertGreater(len(backups_one.keys()), 0)
+        self.assertGreater(len(backups_one), 0)
         backups_all = self.agent.existing_backups([])
-        self.assertGreater(len(backups_all.keys()), 0)
+        self.assertGreater(len(backups_all), 0)
         # Non-existing fileset
         backups_none = self.agent.existing_backups(['XXX'])
-        self.assertEquals(len(backups_none.keys()), 0)
+        self.assertEquals(len(backups_none), 0)
 
     def test_list_backups(self):
         """Test list of existing backups."""
