@@ -10,14 +10,12 @@ class TestBackupConfigurationFile(unittest.TestCase):
         values = backupconfigurationfile.BackupConfigurationFile.read_key_value_file(
             filename="sample_backup.conf")
         self.assertEqual(values['local_temp_directory'], '/tmp')
-        self.assertEqual(values['azure.blob.account_name'], 'testhecbackup')
         #self.assertEqual(values['azure.blob.container_name'], 'immutab')
 
     def test_get_value(self):
         """test get_value"""
         config = backupconfigurationfile.BackupConfigurationFile(filename="sample_backup.conf")
         self.assertEqual(config.get_value('local_temp_directory'), '/tmp')
-        self.assertEqual(config.get_value('azure.blob.account_name'), 'testhecbackup')
         #self.assertEqual(config.get_value('azure.blob.container_name'), 'immutab')
 
     def test_key_exists(self):
