@@ -95,14 +95,14 @@ class Runner(object):
         return config_file
 
     @staticmethod
-    def get_output_dir(args):
+    def get_output_dir(args, cnf):
         """Determine output (temp) directory and check that it is usable."""
 
         if args.output_dir:
             output_dir = os.path.abspath(args.output_dir)
             specified_via = "dir was user-supplied via command line"
-        elif args.config:
-            output_dir = os.path.abspath(BackupConfiguration(args.config).get_standard_local_directory())
+        elif cnf.get_standard_local_directory():
+            output_dir = os.path.abspath(cnf.get_standard_local_directory())
             specified_via = "dir is specified in config file {}".format(args.config)
         else:
             output_dir = os.path.abspath("/tmp")
@@ -167,7 +167,7 @@ class Runner(object):
         config_file = Runner.get_config_file(args=args, parser=parser)
         backup_configuration = BackupConfiguration(config_file)
         backup_agent = BackupAgent(backup_configuration)
-        output_dir = Runner.get_output_dir(args)
+        output_dir = Runner.get_output_dir(args, backup_configuration)
         filesets = Runner.get_filesets(args)
 
         force = args.force

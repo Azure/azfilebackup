@@ -114,7 +114,9 @@ class BackupConfiguration(object):
 
     def get_standard_local_directory(self):
         """Get temporary directory."""
-        return self.cfg_file_value("local_temp_directory")
+        if self.cfg_file.key_exists('local_temp_directory'):
+            return self.cfg_file_value("local_temp_directory")
+        return None
 
     def get_default_fileset(self):
         """Get the default fileset."""
