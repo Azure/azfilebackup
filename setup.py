@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name = 'azfilebak',
-    version = '0.0.1',
+    version = '1.0-alpha',
     packages = ['azfilebak'],
     description="A backup utility for file systems into Azure blob storage",
     author="Dr. Christian Geuer-Pollmann",
