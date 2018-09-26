@@ -1,4 +1,5 @@
 """Unit tests for executableconnector."""
+import os
 import unittest
 from azfilebak import backupconfiguration
 from azfilebak import executableconnector
@@ -19,13 +20,27 @@ class TestExecutableConnector(unittest.TestCase):
         self.assertEqual(proc.returncode, 0)
 
     def test_assemble_backup_command(self):
-        """Test assemble_backup_command"""
-        cmd = self.connector.assemble_backup_command('/', '/proc')
-        self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /proc --exclude /dev --exclude /run --exclude /sys /')
-        cmd = self.connector.assemble_backup_command('/', '/proc,/dev')
-        self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /proc --exclude /dev --exclude /run --exclude /sys /')
-        cmd = self.connector.assemble_backup_command('/', '/foo,/bar')
-        self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /foo --exclude /bar --exclude /dev --exclude /proc --exclude /run --exclude /sys /')
+        """
+        Test assemble_backup_command
+        The tests are different if run within a Docker container,
+        since the list of proc file systems is different.
+        """
+        if os.path.exists('/.dockerenv'):
+            # We are in the matrix
+            cmd = self.connector.assemble_backup_command('/', '/dev')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /dev --exclude /run --exclude /sys --exclude /proc --exclude /proc/bus --exclude /proc/fs --exclude /proc/irq --exclude /proc/sys --exclude /proc/sysrq-trigger /')
+            cmd = self.connector.assemble_backup_command('/', '/proc,/dev')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /proc --exclude /dev --exclude /run --exclude /sys --exclude /proc --exclude /proc/bus --exclude /proc/fs --exclude /proc/irq --exclude /proc/sys --exclude /proc/sysrq-trigger /')
+            cmd = self.connector.assemble_backup_command('/', '/foo,/bar')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /foo --exclude /bar --exclude /dev --exclude /run --exclude /sys --exclude /proc --exclude /proc/bus --exclude /proc/fs --exclude /proc/irq --exclude /proc/sys --exclude /proc/sysrq-trigger /')
+        else:
+            # We are on a dev machine
+            cmd = self.connector.assemble_backup_command('/', '/dev')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /dev --exclude /run --exclude /sys /')
+            cmd = self.connector.assemble_backup_command('/', '/proc,/dev')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /proc --exclude /dev --exclude /run --exclude /sys /')
+            cmd = self.connector.assemble_backup_command('/', '/foo,/bar')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /foo --exclude /bar --exclude /dev --exclude /run --exclude /sys /')
 
 if __name__ == '__main__':
     unittest.main()

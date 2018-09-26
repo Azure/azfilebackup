@@ -6,10 +6,7 @@ ExecutableConnector
 import shlex
 import subprocess
 import logging
-
-from .naming import Naming
-from .funcmodule import printe, out, log_stdout_stderr
-from .backupexception import BackupException
+import psutil
 
 class ExecutableConnector(object):
     """Drive the command that executes the backup."""
@@ -19,23 +16,32 @@ class ExecutableConnector(object):
 
     def assemble_backup_command(self, sources, exclude):
         """Assemble backup command line from configuration."""
+
         # Base command
         cmd = 'tar cpzf - --hard-dereference'
+
         # Add explicit excludes
         excludes = exclude.split(',')
         for i in excludes:
             cmd += ' --exclude ' + i
+
         # Exclude /dev, /proc, /run, /sys
         if '/dev' not in excludes:
             cmd += ' --exclude /dev'
-        if '/proc' not in excludes:
-            cmd += ' --exclude /proc'
         if '/run' not in excludes:
             cmd += ' --exclude /run'
         if '/sys' not in excludes:
             cmd += ' --exclude /sys'
+
+        # Exclude any mount point of type 'proc'
+        mounts = psutil.disk_partitions(True)
+        procmounts = [m.mountpoint for m in mounts if m.fstype == 'proc']
+        for mnt in procmounts:
+            cmd += ' --exclude ' + mnt
+
         # Add the path to archive
         cmd += ' ' + sources
+
         return cmd
 
     def run_backup_command(self, command):

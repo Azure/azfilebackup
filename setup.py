@@ -16,7 +16,8 @@ setup(
         'pid>=2.2.0',
         'azure-storage-common>=1.3.0',
         'azure-storage-blob>=1.3.0',
-        'msrestazure>=0.4.14'
+        'msrestazure>=0.4.14',
+        'psutil'
     ],
     tests_require=[
         'mock'
