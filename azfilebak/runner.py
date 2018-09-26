@@ -38,9 +38,6 @@ class Runner(object):
         """Parse arguments."""
         parser = argparse.ArgumentParser()
 
-        required = parser.add_argument_group("required arguments")
-        required.add_argument("-c", "--config", help="the path to the config file")
-
         commands = parser.add_argument_group("commands")
 
         commands.add_argument("-f", "--full-backup", help="Perform backup for configuration", action="store_true")
@@ -68,6 +65,8 @@ class Runner(object):
 
         options.add_argument("-o",  "--output-dir", help="Specify target folder for backup files")
 
+        options.add_argument("-c", "--config", help="the path to the config file")
+
         return parser
 
     @staticmethod
@@ -89,12 +88,11 @@ class Runner(object):
         """Check the existence of the configuration file and returns its absolute path."""
         if args.config:
             config_file = os.path.abspath(args.config)
-            if not os.path.isfile(config_file):
-                raise BackupException("Cannot find configuration file '{}'".format(config_file))
-            return config_file
         else:
-            parser.print_help()
-            raise BackupException("Please specify a configuration file.")
+            config_file = '/usr/sap/backup/backup.conf'
+        if not os.path.isfile(config_file):
+            raise BackupException("Cannot find configuration file '{}'".format(config_file))
+        return config_file
 
     @staticmethod
     def get_output_dir(args):
