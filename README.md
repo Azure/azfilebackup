@@ -14,7 +14,7 @@ pip install --user virtualenv
 source ~/azfilebak/bin/activate
 ```
 
-### psutil
+### psutil
 
 If the target machine does not have development tools installed, the installation of the `psutil` library will fail.
 
@@ -38,8 +38,38 @@ Or if you downloaded the distribution archive locally:
 pip install dist/azfilebak-0.0.1.tar.gz
 ```
 
-## Usage
+## Usage
 
 ```
 sudo $HOME/azfilebak/bin/azfilebak --full --force
+```
+
+# Development
+
+The tool requires Python 2.7.
+
+Install requirements:
+
+```
+pip install -r requirements.txt
+```
+
+Run tests:
+
+```
+make test
+```
+
+## Tests
+
+Some of the tests need to access a real Azure storage account. The name of the account to use can be changed in the file `sample_instance_metadata.json`:
+
+```
+"tags": "StorageAccount:sahec99az1backup0001;
+```
+
+The storage account key can be specified via an environment variable:
+
+```
+export STORAGE_KEY='xxx'
 ```
