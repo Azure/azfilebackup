@@ -52,7 +52,7 @@ class TestExecutableConnector(unittest.TestCase):
             cmd = self.connector.assemble_backup_command('/', '/dev')
             self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /dev --exclude /run --exclude /sys --exclude /proc /')
             cmd = self.connector.assemble_backup_command('/', '/proc,/dev')
-            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /proc --exclude /dev --exclude /run --exclude /sys /')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /proc --exclude /dev --exclude /run --exclude /sys --exclude /proc /')
             cmd = self.connector.assemble_backup_command('/', '/foo,/bar')
             self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /foo --exclude /bar --exclude /dev --exclude /run --exclude /sys --exclude /proc /')
 
