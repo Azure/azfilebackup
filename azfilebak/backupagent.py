@@ -211,7 +211,7 @@ class BackupAgent(object):
             # Wait for the command to terminate
             proc.wait()
         except Exception as ex:
-            logging.warn("Failed to stream blob: %s", ex.message)
+            logging.error("Failed to stream blob: %s", ex.message)
             raise ex
 
         # Return name of new blob

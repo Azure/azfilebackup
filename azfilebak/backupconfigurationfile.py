@@ -16,7 +16,7 @@ class BackupConfigurationFile(object):
 
         try:
             vals = BackupConfigurationFile.read_key_value_file(filename=self.filename)
-            logging.debug("Configuration %s", str(vals))
+            #logging.debug("Configuration %s", str(vals))
         except Exception as ex:
             raise BackupException("Error parsing config file {}:\n{}".format(filename, ex.message))
 

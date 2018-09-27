@@ -8,8 +8,9 @@ from azfilebak.azurevminstancemetadata import AzureVMInstanceMetadata
 from azfilebak.businesshours import BusinessHours
 from azfilebak.scheduleparser import ScheduleParser
 from azfilebak.naming import Naming
+from tests.loggedtestcase import LoggedTestCase
 
-class TestBackupAgent(unittest.TestCase):
+class TestBackupAgent(LoggedTestCase):
     """Unit tests for class BackupAgent."""
 
     def setUp(self):

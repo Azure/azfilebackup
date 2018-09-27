@@ -48,7 +48,7 @@ class ExecutableConnector(object):
         """Create a backup for a given fileset."""
         args = shlex.split(command)
 
-        logging.debug("Executing %s", args[0])
+        logging.info("Executing %s", ' '.join(args))
 
         proc = subprocess.Popen(
             args,

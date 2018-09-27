@@ -1,8 +1,9 @@
 """Unit tests for backupconfigurationfile."""
 import unittest
 from azfilebak import backupconfigurationfile
+from tests.loggedtestcase import LoggedTestCase
 
-class TestBackupConfigurationFile(unittest.TestCase):
+class TestBackupConfigurationFile(LoggedTestCase):
     """Unit tests for class BackupConfigurationFile."""
 
     def test_read_key_value_file(self):

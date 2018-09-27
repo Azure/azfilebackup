@@ -3,8 +3,9 @@ import time
 import datetime
 import unittest
 from azfilebak.timing import Timing
+from tests.loggedtestcase import LoggedTestCase
 
-class TestTiming(unittest.TestCase):
+class TestTiming(LoggedTestCase):
     """Unit tests for class Timing."""
 
     @staticmethod

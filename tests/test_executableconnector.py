@@ -4,8 +4,9 @@ import subprocess
 import unittest
 from azfilebak import backupconfiguration
 from azfilebak import executableconnector
+from tests.loggedtestcase import LoggedTestCase
 
-class TestExecutableConnector(unittest.TestCase):
+class TestExecutableConnector(LoggedTestCase):
     """Unit tests for class ExecutableConnector."""
 
     def setUp(self):

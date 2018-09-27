@@ -5,8 +5,9 @@ import unittest
 from mock import patch
 from azfilebak.backupconfiguration import BackupConfiguration
 from azfilebak.azurevminstancemetadata import AzureVMInstanceMetadata
+from tests.loggedtestcase import LoggedTestCase
 
-class TestBackupConfiguration(unittest.TestCase):
+class TestBackupConfiguration(LoggedTestCase):
     """Unit tests for class BackupConfiguration."""
 
     def setUp(self):

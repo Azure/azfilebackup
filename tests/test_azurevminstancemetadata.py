@@ -3,8 +3,9 @@ import json
 import unittest
 from mock import patch
 from azfilebak.azurevminstancemetadata import AzureVMInstanceMetadata
+from tests.loggedtestcase import LoggedTestCase
 
-class TestAzureVMInstanceMetadata(unittest.TestCase):
+class TestAzureVMInstanceMetadata(LoggedTestCase):
     """Unit tests for class AzureVMInstanceMetadata."""
 
     def setUp(self):

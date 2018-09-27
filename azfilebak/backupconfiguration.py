@@ -146,12 +146,12 @@ class BackupConfiguration(object):
         # TODO: check instane metadata tag
         try:
             account = self.instance_metadata.get_tags()['StorageAccount']
-            logging.info("Using storage account name from instance metadata: %s", account)
+            logging.debug("Using storage account name from instance metadata: %s", account)
         except Exception as ex:
             cid = self.cfg_file_value("DEFAULT.CID").lower()
             name = self.get_vm_name()[0:5]
             account = "sa{}{}backup0001".format(name, cid)
-            logging.info("No storage account in instance metadata, using generated: %s", account)
+            logging.debug("No storage account in instance metadata, using generated: %s", account)
         return account
 
     @property
