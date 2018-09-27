@@ -189,7 +189,4 @@ class BackupConfiguration(object):
                     account_name=account_name,
                     token_credential=token_credential)
 
-            _created = self._block_blob_service.create_container(
-                container_name=self.azure_storage_container_name)
-
         return self._block_blob_service
