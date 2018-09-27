@@ -31,7 +31,8 @@ class Runner(object):
             level=logging.DEBUG,
             format="%(asctime)-15s pid-%(process)d line-%(lineno)d %(levelname)s: \"%(message)s\""
             )
-        logging.getLogger('azure.storage').setLevel(logging.FATAL)
+        logging.getLogger('azure.storage').setLevel(logging.ERROR)
+        logging.getLogger('urllib3.connectionpool').setLevel(logging.ERROR)
 
     @staticmethod
     def arg_parser():
