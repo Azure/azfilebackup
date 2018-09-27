@@ -30,9 +30,11 @@ class Runner(object):
             filename="azfilebak.log",
             level=logging.DEBUG,
             format="%(asctime)-15s pid-%(process)d line-%(lineno)d %(levelname)s: \"%(message)s\""
-            )
+        )
+        # Turn down verbosity on some of the third-party libraries
         logging.getLogger('azure.storage').setLevel(logging.ERROR)
         logging.getLogger('urllib3.connectionpool').setLevel(logging.ERROR)
+        logging.getLogger('msrestazure.azure_active_directory').setLevel(logging.ERROR)
 
     @staticmethod
     def arg_parser():

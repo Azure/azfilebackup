@@ -158,6 +158,7 @@ class BackupAgent(object):
     def backup_default(self, is_full, force):
         """Determine default backup configuration."""
         fs = self.backup_configuration.get_default_fileset()
+        logging.info("Backup request for default fileset: %s", fs)
         # Get the sources and exclude
         sources = self.backup_configuration.get_fileset_sources(fs)
         exclude = self.backup_configuration.get_fileset_exclude(fs)
@@ -178,6 +179,9 @@ class BackupAgent(object):
         Backup a single fileset using the specified command.
         If no command is provided, it will be looked up in the config file.
         """
+        logging.info("Backup request for fileset: %s", fileset)
+
+        # Determine if backup can run according to schedule
         start_timestamp = Timing.now_localtime()
         if not self.should_run_backup(
                 fileset=fileset, is_full=is_full,
@@ -185,7 +189,6 @@ class BackupAgent(object):
             logging.warn("Skipping backup of fileset %s", fileset)
             return
 
-        storage_client = self.backup_configuration.storage_client
         # Final destination container 
         dest_container_name = self.backup_configuration.azure_storage_container_name
         # Name of the backup blob
@@ -202,7 +205,12 @@ class BackupAgent(object):
             proc = self.executable_connector.run_backup_command(
                 command)
 
+            logging.debug(
+                "Streaming backup to blob: %s in container: %s",
+                blob_name, dest_container_name)
+
             # Stream backup command stdout to the blob
+            storage_client = self.backup_configuration.storage_client
             storage_client.create_blob_from_stream(
                 container_name=dest_container_name,
                 blob_name=blob_name, stream=proc.stdout,
@@ -213,6 +221,8 @@ class BackupAgent(object):
         except Exception as ex:
             logging.error("Failed to stream blob: %s", ex.message)
             raise ex
+
+        logging.debug("Finished streaming blob: %s", blob_name)
 
         # Return name of new blob
         return blob_name
