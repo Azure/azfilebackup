@@ -2,10 +2,10 @@ from setuptools import setup
 
 setup(
     name = 'azfilebak',
-    version = '1.0-alpha',
+    version = '1.0-alpha1',
     packages = ['azfilebak'],
     description="A backup utility for file systems into Azure blob storage",
-    author="Dr. Christian Geuer-Pollmann",
+    author="Microsoft",
     author_email='chgeuer@microsoft.com',
     entry_points = {
         'console_scripts': [
