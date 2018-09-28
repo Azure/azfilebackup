@@ -145,7 +145,7 @@ class BackupConfiguration(object):
         #return self.cfg_file_value("azure.blob.account_name")
         # TODO: check instane metadata tag
         try:
-            account = self.instance_metadata.get_tags()['StorageAccount']
+            account = self.instance_metadata.get_tags()['bkp_storage_account']
             logging.debug("Using storage account name from instance metadata: %s", account)
         except Exception as ex:
             cid = self.cfg_file_value("DEFAULT.CID").lower()

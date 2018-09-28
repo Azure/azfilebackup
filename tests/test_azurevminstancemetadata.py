@@ -20,7 +20,7 @@ class TestAzureVMInstanceMetadata(LoggedTestCase):
     def test_get_tags(self):
         """test get_tags with empty tags property"""
         tags = self.meta.get_tags()
-        self.assertEqual(len(tags), 9)
+        self.assertEqual(len(tags), 7)
         self.assertEqual(tags['Name'], 'hec42v106014')
 
     def test_vm_name(self):
