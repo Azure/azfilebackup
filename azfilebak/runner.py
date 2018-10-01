@@ -139,18 +139,6 @@ class Runner(object):
         return []
 
     @staticmethod
-    def run_unit_tests():
-        """Run doctests."""
-        import doctest
-        # import unittest
-        # suite = unittest.TestSuite()
-        # result = unittest.TestResult()
-        # finder = doctest.DocTestFinder(exclude_empty=False)
-        # suite.addTest(doctest.DocTestSuite('backupagent', test_finder=finder))
-        # suite.run(result)
-        doctest.testmod() # doctest.testmod(verbose=True)
-
-    @staticmethod
     def main():
         """Main method."""
 
@@ -160,10 +148,6 @@ class Runner(object):
         logging.info("#######################################################################################################")
         parser = Runner.arg_parser()
         args = parser.parse_args()
-
-        if args.unit_tests:
-            Runner.run_unit_tests()
-            return
 
         logging.debug(Runner.log_script_invocation())
 
