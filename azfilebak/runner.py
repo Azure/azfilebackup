@@ -179,8 +179,6 @@ class Runner(object):
         elif args.prune_old_backups:
             age = ScheduleParser.parse_timedelta(args.prune_old_backups)
             backup_agent.prune_old_backups(older_than=age, filesets=filesets)
-        elif args.unit_tests:
-            Runner.run_unit_tests()
         elif args.show_configuration:
             print(backup_agent.show_configuration(output_dir=output_dir))
         else:
