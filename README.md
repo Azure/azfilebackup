@@ -1,5 +1,7 @@
 # Filesystem backup utility for Azure Blob Storage
 
+[![Build Status](https://dev.azure.com/tcontemsft/tconte/_apis/build/status/tomconte.azfilebak)](https://dev.azure.com/tcontemsft/tconte/_build/latest?definitionId=1)
+
 This tool uses tar to perform backups of a file system and upload the archive to Azure Blob Storage.
 
 ## Installation
