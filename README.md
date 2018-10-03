@@ -31,7 +31,7 @@ pip install https://github.com/tomconte/azfilebak/raw/master/bdist/psutil-5.4.7-
 You can install directly from a release URL:
 
 ```
-pip install https://github.com/tomconte/azfilebak/releases/download/v1.0-alpha/azfilebak-1.0-alpha.tar.gz
+pip install https://github.com/tomconte/azfilebak/releases/download/v1.0-alpha1/azfilebak-1.0a1.tar.gz
 ```
 
 Or if you downloaded the distribution archive locally:
