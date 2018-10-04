@@ -23,7 +23,7 @@ If the target machine does not have development tools installed, the installatio
 A binary release of `psutil` is provided for your convenience. Install it using `pip` before running the next step.
 
 ```
-pip install https://github.com/tomconte/azfilebak/raw/master/bdist/psutil-5.4.7-cp27-cp27mu-linux_x86_64.whl
+pip install https://github.com/Azure/azfilebackup/raw/master/bdist/psutil-5.4.7-cp27-cp27mu-linux_x86_64.whl
 ```
 
 ### Install the tool
@@ -31,7 +31,7 @@ pip install https://github.com/tomconte/azfilebak/raw/master/bdist/psutil-5.4.7-
 You can install directly from a release URL:
 
 ```
-pip install https://github.com/tomconte/azfilebak/releases/download/v1.0-alpha1/azfilebak-1.0a1.tar.gz
+pip install https://github.com/Azure/azfilebackup/releases/download/v1.0-alpha1/azfilebak-1.0a1.tar.gz
 ```
 
 Or if you downloaded the distribution archive locally:
