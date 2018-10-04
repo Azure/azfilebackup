@@ -46,7 +46,7 @@ pip install dist/azfilebak-0.0.1.tar.gz
 sudo $HOME/azfilebak/bin/azfilebak --full --force
 ```
 
-# Development
+## Development
 
 The tool requires Python 2.7.
 
@@ -62,7 +62,7 @@ Run tests:
 make test
 ```
 
-## Tests
+### Tests
 
 Some of the tests need to access a real Azure storage account. The name of the account to use can be changed in the file `sample_instance_metadata.json`:
 
