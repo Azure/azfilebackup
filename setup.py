@@ -5,8 +5,8 @@ setup(
     version = '1.0-alpha1',
     packages = ['azfilebak'],
     description="A backup utility for file systems into Azure blob storage",
-    author="Microsoft",
-    author_email='chgeuer@microsoft.com',
+    author="Microsoft Corporation",
+    author_email='opensource@microsoft.com',
     entry_points = {
         'console_scripts': [
             'azfilebak = azfilebak.__main__:main'
