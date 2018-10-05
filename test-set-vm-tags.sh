@@ -1,11 +1,11 @@
 #!/bin/bash
 
-rg=test-backup
+rg=test-backup-vm
 vm_name=test-backup
 
 az vm update --resource-group "${rg}" --name "${vm_name}" --set \
     tags.InfrastructureProvider=GMPTIC \
-    tags.StorageAccount=sahec99az1backup0001 \
+    tags.bkp_storage_account=sahec99az1backup0001 \
     tags.Name=hec99v106014 \
     tags.Serial=AFD83530-840D-11E8-9E6C-FC820C452436 \
     tags.bkp_db_schedule="mo:111111111111111111111111, tu:111111111111111111111111, we:111111111111111111111111, th:111111111111111111111111, fr:111111111111111111111111, sa:111111111111111111111111, su:111111111111111111111111, min:1d, max:3d" \
