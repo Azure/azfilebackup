@@ -2,7 +2,6 @@
 """BackupConfigurationFile module."""
 
 import re
-import logging
 import os.path
 from .backupexception import BackupException
 
@@ -15,7 +14,7 @@ class BackupConfigurationFile(object):
         self.filename = filename
 
         try:
-            vals = BackupConfigurationFile.read_key_value_file(filename=self.filename)
+            BackupConfigurationFile.read_key_value_file(filename=self.filename)
             #logging.debug("Configuration %s", str(vals))
         except Exception as ex:
             raise BackupException("Error parsing config file {}:\n{}".format(filename, ex.message))

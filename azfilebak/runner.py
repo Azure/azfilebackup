@@ -87,7 +87,7 @@ class Runner(object):
         ])
 
     @staticmethod
-    def get_config_file(args, parser):
+    def get_config_file(args):
         """Check the existence of the configuration file and returns its absolute path."""
         if args.config:
             config_file = os.path.abspath(args.config)
@@ -151,7 +151,7 @@ class Runner(object):
 
         logging.debug(Runner.log_script_invocation())
 
-        config_file = Runner.get_config_file(args=args, parser=parser)
+        config_file = Runner.get_config_file(args=args)
         backup_configuration = BackupConfiguration(config_file)
         backup_agent = BackupAgent(backup_configuration)
         output_dir = Runner.get_output_dir(args, backup_configuration)
