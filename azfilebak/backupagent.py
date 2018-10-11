@@ -12,8 +12,6 @@ import time
 from .naming import Naming
 from .timing import Timing
 from .executableconnector import ExecutableConnector
-from .businesshours import BusinessHours
-from .scheduleparser import ScheduleParser
 
 class BackupAgent(object):
     """

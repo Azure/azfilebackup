@@ -71,8 +71,6 @@ class BackupConfiguration(object):
         """Get location."""
         return self.instance_metadata.location
 
-    # TODO: rework according to new config file format
-
     def get_backup_command(self, configuration_name):
         """Get backup command line for given fileset."""
         return self.cfg_file_value("command.backup.{}".format(configuration_name))
@@ -133,8 +131,8 @@ class BackupConfiguration(object):
         """Get fileset sources."""
         return self.cfg_file_value("fs.{}.exclude".format(fileset))
 
-    # TODO: these values should be computed unless they are
-    # overloaded using environment or config file or tag
+    # These are should be computed unless they are
+    # overloaded using config file or tag
 
     def get_azure_storage_account_name(self):
         """
@@ -142,12 +140,10 @@ class BackupConfiguration(object):
         instance metadata tag, otherwise is assembled using configuration
         information.
         """
-        #return self.cfg_file_value("azure.blob.account_name")
-        # TODO: check instane metadata tag
         try:
             account = self.instance_metadata.get_tags()['bkp_storage_account']
             logging.debug("Using storage account name from instance metadata: %s", account)
-        except Exception as ex:
+        except BackupException:
             cid = self.cfg_file_value("DEFAULT.CID").lower()
             name = self.get_vm_name()[0:5]
             account = "sa{}{}backup0001".format(name, cid)

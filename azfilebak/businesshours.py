@@ -91,7 +91,7 @@ class BusinessHours(object):
         """
         try:
             hour_strs = re.findall(r"([01])", day_values)
-            durations = map(lambda x: {"1":True, "0":False}[x], hour_strs)
+            durations = [{"1":True, "0":False}[x] for x in hour_strs]
             return durations
         except Exception as e:
             raise(BackupException("Error parsing business hours '{}': {}".format(day_values, e.message)))

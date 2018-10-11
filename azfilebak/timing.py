@@ -3,7 +3,6 @@
 
 import time
 import datetime
-import logging
 
 class Timing(object):
     """Timing class."""
