@@ -203,7 +203,7 @@ class BackupAgent(object):
             proc = self.executable_connector.run_backup_command(
                 command)
 
-            logging.debug(
+            logging.info(
                 "Streaming backup to blob: %s in container: %s",
                 blob_name, dest_container_name)
 
@@ -220,7 +220,7 @@ class BackupAgent(object):
             logging.error("Failed to stream blob: %s", ex.message)
             raise ex
 
-        logging.debug("Finished streaming blob: %s", blob_name)
+        logging.info("Finished streaming blob: %s", blob_name)
 
         # Return name of new blob
         return blob_name
