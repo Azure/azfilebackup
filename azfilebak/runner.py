@@ -164,7 +164,7 @@ class Runner(object):
 
         if args.full_backup:
             try:
-                with pid.PidFile(pidname='fileset-backup-full', piddir=".") as _p:
+                with pid.PidFile(pidname='fileset-backup-full') as _p:
                     backup_agent.backup(filesets=filesets, is_full=args.full_backup, force=force)
             except pid.PidFileAlreadyLockedError:
                 logging.warn("Skip full backup, already running")
