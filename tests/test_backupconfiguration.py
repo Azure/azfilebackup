@@ -86,6 +86,11 @@ class TestBackupConfiguration(LoggedTestCase):
         uuid = self.cfg.get_system_uuid()
         self.assertEqual(uuid, 'UUID000')
 
+    def test_get_notification_command(self):
+        """Test get_notification_command."""
+        uuid = self.cfg.get_notification_command()
+        self.assertEqual(uuid, '/usr/sbin/ticmcmc --stdin')
+
     def tearDown(self):
         self.patcher1.stop()
         self.patcher2.stop()

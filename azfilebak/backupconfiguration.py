@@ -12,6 +12,8 @@ from azfilebak.businesshours import BusinessHours
 from azfilebak.scheduleparser import ScheduleParser
 from azfilebak.backupexception import BackupException
 
+DEFAULT_NOTIFICATION_COMMAND = "/usr/sbin/ticmcmc --stdin"
+
 class BackupConfiguration(object):
     """Access configuration values."""
 
@@ -131,6 +133,12 @@ class BackupConfiguration(object):
     def get_fileset_exclude(self, fileset):
         """Get fileset sources."""
         return self.cfg_file_value("fs.{}.exclude".format(fileset))
+
+    def get_notification_command(self):
+        """Get notification command with fall back to default."""
+        if self.cfg_file.key_exists('notification_command'):
+            return self.cfg_file_value("notification_command")
+        return DEFAULT_NOTIFICATION_COMMAND
 
     # These values are obtained from various system configuration or tools
 
