@@ -3,6 +3,7 @@
 
 import os
 import logging
+import subprocess
 from azure.storage.blob import BlockBlobService
 from msrestazure.azure_active_directory import MSIAuthentication
 from azfilebak.azurevminstancemetadata import AzureVMInstanceMetadata
@@ -130,6 +131,14 @@ class BackupConfiguration(object):
     def get_fileset_exclude(self, fileset):
         """Get fileset sources."""
         return self.cfg_file_value("fs.{}.exclude".format(fileset))
+
+    # These values are obtained from various system configuration or tools
+
+    def get_system_uuid(self):
+        """Get system-uuid property from dmidecode, where Azure puts a unique VM identifier."""
+        # TODO: this is system dependent, should check dmidecode exists and fall back
+        uuid = subprocess.check_output(["sudo", "dmidecode", "--string", "system-uuid"])
+        return uuid.strip()
 
     # These are should be computed unless they are
     # overloaded using config file or tag

@@ -21,6 +21,11 @@ class TestBackupConfiguration(LoggedTestCase):
                               return_value=self.meta)
         self.patcher1.start()
 
+        # Mock `dmidecode` execution
+        self.patcher2 = patch('subprocess.check_output',
+                              return_value='UUID000')
+        self.patcher2.start()
+
         self.cfg = BackupConfiguration(config_filename="sample_backup.conf")
 
     def test_cfg_file_value(self):
@@ -76,8 +81,14 @@ class TestBackupConfiguration(LoggedTestCase):
         client = self.cfg.storage_client
         self.assertEqual(client.protocol, 'https')
 
+    def test_get_system_uuid(self):
+        """Test get_system_uuid."""
+        uuid = self.cfg.get_system_uuid()
+        self.assertEqual(uuid, 'UUID000')
+
     def tearDown(self):
         self.patcher1.stop()
+        self.patcher2.stop()
 
 if __name__ == '__main__':
     unittest.main()
