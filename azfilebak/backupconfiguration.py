@@ -143,9 +143,15 @@ class BackupConfiguration(object):
     # These values are obtained from various system configuration or tools
 
     def get_system_uuid(self):
-        """Get system-uuid property from dmidecode, where Azure puts a unique VM identifier."""
-        # TODO: this is system dependent, should check dmidecode exists and fall back
-        uuid = subprocess.check_output(["sudo", "dmidecode", "--string", "system-uuid"])
+        """
+        Try to get a Serial property from the instance metadata tags. If that fails,
+        get system-uuid property from dmidecode, where Azure puts a unique VM identifier.
+        """
+        try:
+            uuid = self.instance_metadata_tag_value('Serial')
+        except BackupException:
+            # TODO: this is system dependent, should check dmidecode exists and fall back
+            uuid = subprocess.check_output(["sudo", "dmidecode", "--string", "system-uuid"])
         return uuid.strip()
 
     # These are should be computed unless they are
