@@ -5,13 +5,14 @@ import logging
 import os
 import datetime
 import json
-import urllib2
-import uuid
 import time
+import subprocess
+import shlex
 
-from .naming import Naming
-from .timing import Timing
-from .executableconnector import ExecutableConnector
+import azfilebak
+from azfilebak.naming import Naming
+from azfilebak.timing import Timing
+from azfilebak.executableconnector import ExecutableConnector
 
 class BackupAgent(object):
     """
@@ -187,7 +188,7 @@ class BackupAgent(object):
             logging.warn("Skipping backup of fileset %s", fileset)
             return
 
-        # Final destination container 
+        # Final destination container
         dest_container_name = self.backup_configuration.azure_storage_container_name
         # Name of the backup blob
         blob_name = Naming.construct_blobname(fileset=fileset,
@@ -218,9 +219,28 @@ class BackupAgent(object):
             proc.wait()
         except Exception as ex:
             logging.error("Failed to stream blob: %s", ex.message)
+            self.send_notification(
+                is_full, start_timestamp, False,
+                0, '/' + dest_container_name + '/' + blob_name, ex.message)
             raise ex
 
         logging.info("Finished streaming blob: %s", blob_name)
+
+        # Get blob size
+        try:
+            blob_props = storage_client.get_blob_properties(dest_container_name, blob_name)
+        except Exception as ex:
+            logging.error("Failed to get blob size: %s", ex.message)
+            self.send_notification(
+                is_full, start_timestamp, False,
+                0, '/' + dest_container_name + '/' + blob_name, ex.message)
+            raise ex
+
+        # Send notification
+        self.send_notification(
+            is_full, start_timestamp, True,
+            blob_props.properties.content_length,
+            '/' + dest_container_name + '/' + blob_name, None)
 
         # Return name of new blob
         return blob_name
@@ -378,34 +398,40 @@ class BackupAgent(object):
     # Integration commands. (e.g. TIC)
     #
 
-    def send_notification(self, url, aseservername, db_name, is_full, start_timestamp, end_timestamp, success, data_in_MB, error_msg=None):
-        """Send a notification to TIC."""
+    def get_notification_message(self, is_full, start_timestamp, success, blob_size, blob_path, error_msg):
+        """Assemble JSON message for notification."""
         data = {
-            "SourceSystem" :"Azure",
-            "BackupManagementType_s": "AzureWorkload", 
-            "BackupItemType_s": "SAPASEDatabase",
-            "TenantId" :"unknown",
-            "SubscriptionId": self.backup_configuration.get_subscription_id(),
-            "Resource": self.backup_configuration.get_vm_name(),
-            "BackupItemFriendlyName_s": db_name,
-            "BackupItemUniqueId_s": "{location};{storageaccountid};{resourcetype};{resourcegroupname};{resourcename};{aseservername};{db_name}".format(
-                location=self.backup_configuration.get_location(),
-                storageaccountid=self.backup_configuration.get_azure_storage_account_name(),
-                resourcetype="compute",
-                resourcegroupname=self.backup_configuration.get_resource_group_name(),
-                resourcename=self.backup_configuration.get_vm_name(),
-                aseservername=aseservername,
-                db_name=db_name),
-            "JobUniqueId_g": str(uuid.uuid4()),
-            "JobStatus_s": {True:"Completed", False:"Failed"}[success],
-            "JobFailureCode_s": {None:"Success", error_msg:error_msg}[error_msg], # "Success OperationCancelledBecauseConflictingOperationRunningUserError",
-            "JobOperationSubType_s": {True:"Full", False:"Log"}[is_full],
-            "TimeGenerated": time.strftime("%Y-%m-%dT%H:%M:%SZ", Timing.parse(end_timestamp)), #"2018-07-12T14:46:09.726Z",
-            "JobStartDateTime_s": time.strftime("%Y-%m-%d %H:%M:%SZ", Timing.parse(start_timestamp)), # "2018-07-13 04:33:00Z",
-            "JobDurationInSecs_s": "{}".format(int(Timing.time_diff_in_seconds(start_timestamp, end_timestamp))),
-            "DataTransferredInMB_s": "{}".format(int(data_in_MB))
+            "cloud" :"azure",
+            "hostname": self.backup_configuration.get_vm_name(),
+            "instance-id": self.backup_configuration.get_system_uuid(),
+            "state": {True: "success", False:" fail"}[success],
+            "type": "fs",
+            "method": "file",
+            "level": {True: "full", False: "incr"}[is_full],
+            "account-id": self.backup_configuration.get_subscription_id(),
+            "customer-id": self.backup_configuration.cfg_file_value("DEFAULT.CID"),
+            "system-id": self.backup_configuration.cfg_file_value("DEFAULT.SID"),
+            "database-name": "",
+            "database-id": "",
+            "s3-path": self.backup_configuration.get_azure_storage_account_name() +
+                       '.blob.core.windows.net' + blob_path,
+            "timestamp-send": int(time.mktime(time.localtime())),
+            "timestamp-last-successful": int(time.mktime(Timing.parse(start_timestamp))),
+            "timestamp-bkp-begin": "",
+            "timestamp-bkp-end": int(time.mktime(Timing.parse(start_timestamp))),
+            "backup-size": blob_size,
+            "dbtype": "",
+            "error-message": error_msg or '',
+            "script-version": azfilebak.__version__
         }
-        req = urllib2.Request(url)
-        req.add_header('Content-Type', 'application/json')
-        response = urllib2.urlopen(req, json.dumps(data))
-        return response.read()
+        return json.dumps(data)
+
+    def send_notification(self, is_full, start_timestamp, success, blob_size, blob_path, error_msg=None):
+        """Send a notification to TIC."""
+        json_str = self.get_notification_message(
+            is_full, start_timestamp, success,
+            blob_size, blob_path, error_msg)
+        cmd = self.backup_configuration.get_notification_command()
+        proc = subprocess.Popen(shlex.split(cmd), stdin=subprocess.PIPE)
+        proc.communicate(json_str)
+        return

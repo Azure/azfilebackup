@@ -24,6 +24,11 @@ class TestBackupAgent(LoggedTestCase):
                               return_value=self.meta)
         self.patcher1.start()
 
+        # Mock `dmidecode` execution
+        self.patcher2 = patch('subprocess.check_output',
+                              return_value='UUID000')
+        self.patcher2.start()
+
         self.cfg = backupconfiguration.BackupConfiguration(config_filename="sample_backup.conf")
         self.agent = backupagent.BackupAgent(self.cfg)
 
@@ -195,8 +200,16 @@ class TestBackupAgent(LoggedTestCase):
         self.agent.backup_default(True, True)
         return True
 
+    def test_get_notification_message(self):
+        """Test get_notification_message."""
+        json_str = self.agent.get_notification_message(True, "20180601_112429", True, 42, '/container/blob.tar.gz', None)
+        obj = json.loads(json_str)
+        self.assertEqual(obj["system-id"], "AZ3")
+        self.assertEqual(obj["hostname"], "hec99v106014")
+
     def tearDown(self):
         self.patcher1.stop()
+        self.patcher2.stop()
 
 if __name__ == '__main__':
     unittest.main()
