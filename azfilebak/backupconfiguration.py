@@ -3,6 +3,7 @@
 
 import os
 import logging
+import subprocess
 from azure.storage.blob import BlockBlobService
 from msrestazure.azure_active_directory import MSIAuthentication
 from azfilebak.azurevminstancemetadata import AzureVMInstanceMetadata
@@ -10,6 +11,8 @@ from azfilebak.backupconfigurationfile import BackupConfigurationFile
 from azfilebak.businesshours import BusinessHours
 from azfilebak.scheduleparser import ScheduleParser
 from azfilebak.backupexception import BackupException
+
+DEFAULT_NOTIFICATION_COMMAND = "/usr/sbin/ticmcmc --stdin"
 
 class BackupConfiguration(object):
     """Access configuration values."""
@@ -130,6 +133,26 @@ class BackupConfiguration(object):
     def get_fileset_exclude(self, fileset):
         """Get fileset sources."""
         return self.cfg_file_value("fs.{}.exclude".format(fileset))
+
+    def get_notification_command(self):
+        """Get notification command with fall back to default."""
+        if self.cfg_file.key_exists('notification_command'):
+            return self.cfg_file_value("notification_command")
+        return DEFAULT_NOTIFICATION_COMMAND
+
+    # These values are obtained from various system configuration or tools
+
+    def get_system_uuid(self):
+        """
+        Try to get a Serial property from the instance metadata tags. If that fails,
+        get system-uuid property from dmidecode, where Azure puts a unique VM identifier.
+        """
+        try:
+            uuid = self.instance_metadata_tag_value('Serial')
+        except BackupException:
+            # TODO: this is system dependent, should check dmidecode exists and fall back
+            uuid = subprocess.check_output(["sudo", "dmidecode", "--string", "system-uuid"])
+        return uuid.strip()
 
     # These are should be computed unless they are
     # overloaded using config file or tag

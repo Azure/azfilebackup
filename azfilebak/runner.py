@@ -27,8 +27,7 @@ class Runner(object):
     def configure_logging():
         """Configure logging."""
         logging.basicConfig(
-            filename="azfilebak.log",
-            level=logging.DEBUG,
+            level=logging.INFO,
             format="%(asctime)-15s pid-%(process)d line-%(lineno)d %(levelname)s: \"%(message)s\""
         )
         # Turn down verbosity on some of the third-party libraries
@@ -69,6 +68,10 @@ class Runner(object):
         options.add_argument("-o",  "--output-dir", help="Specify target folder for backup files")
 
         options.add_argument("-c", "--config", help="the path to the config file")
+
+        options.add_argument("-d", "--debug",
+                             help="display debug messages",
+                             action="store_true")
 
         return parser
 
@@ -143,11 +146,11 @@ class Runner(object):
         """Main method."""
 
         Runner.configure_logging()
-        logging.info("#######################################################################################################")
-        logging.info("#                                                                                                     #")
-        logging.info("#######################################################################################################")
         parser = Runner.arg_parser()
         args = parser.parse_args()
+
+        if args.debug:
+            logging.getLogger().setLevel(logging.DEBUG)
 
         logging.debug(Runner.log_script_invocation())
 
@@ -164,7 +167,7 @@ class Runner(object):
 
         if args.full_backup:
             try:
-                with pid.PidFile(pidname='fileset-backup-full', piddir=".") as _p:
+                with pid.PidFile(pidname='fileset-backup-full') as _p:
                     backup_agent.backup(filesets=filesets, is_full=args.full_backup, force=force)
             except pid.PidFileAlreadyLockedError:
                 logging.warn("Skip full backup, already running")
