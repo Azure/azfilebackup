@@ -1,4 +1,10 @@
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+# --------------------------------------------------------------------------
+
 """Unit tests for timing."""
+
 import time
 import datetime
 import unittest

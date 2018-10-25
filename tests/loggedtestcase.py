@@ -1,6 +1,13 @@
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+# --------------------------------------------------------------------------
+
 import sys
 import unittest
 import logging
+
+# Adapted from: https://stackoverflow.com/a/15969985
 
 class LogThisTestCase(type):
     def __new__(cls, name, bases, dct):

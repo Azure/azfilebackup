@@ -1,5 +1,10 @@
 # coding=utf-8
 
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+# --------------------------------------------------------------------------
+
 import datetime
 import re
 from .backupexception import BackupException
