@@ -187,6 +187,15 @@ class TestBackupAgent(LoggedTestCase):
         # TODO: test that expected files were indeed restored...
         return True
 
+    def test_restore_blob(self):
+        """Test restoring a blob."""
+        # We should have a backup from the preceding test cases.
+        backups = self.agent.existing_backups_for_fileset('tmp_dir', True)
+        blob_name = backups.popitem()[1][0]
+        self.agent.restore_blob(blob_name, '/tmp')
+        # TODO: test that expected files were indeed restored...
+        return True
+
     def test_prune_old_backups(self):
         """Test prune_old_backups."""
         # Delete backups older than 7 days

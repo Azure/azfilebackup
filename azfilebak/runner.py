@@ -144,7 +144,7 @@ class Runner(object):
             logging.debug("User manually selected filesets: %s", str(filesets))
             return filesets
 
-        logging.debug("User did not select filesets, trying to backup all filesets")
+        logging.debug("User did not select filesets, will use default fileset")
         return []
 
     @staticmethod
@@ -178,11 +178,20 @@ class Runner(object):
             except pid.PidFileAlreadyLockedError:
                 logging.warn("Skip full backup, already running")
         elif args.restore:
-            try:
-                Timing.parse(args.restore)
-            except Exception:
-                raise BackupException("Cannot parse restore point \"{}\"".format(args.restore))
-            backup_agent.restore(restore_point=args.restore, output_dir=output_dir, filesets=filesets, stream=args.stream)
+            if args.restore.endswith('.tar.gz'):
+                # Restore using blob name
+                if filesets:
+                    logging.warn("Ignoring fileset (blob name provided)")
+                backup_agent.restore_blob(blobname=args.restore, output_dir=output_dir, stream=args.stream)
+            else:
+                # Restore using fileset + timestamp
+                try:
+                    Timing.parse(args.restore)
+                except Exception:
+                    raise BackupException("Cannot parse restore point \"{}\"".format(args.restore))
+                if len(filesets) > 1 and args.stream:
+                    raise BackupException("Cannot stream more than one fileset")
+                backup_agent.restore(restore_point=args.restore, output_dir=output_dir, filesets=filesets, stream=args.stream)
         elif args.list_backups:
             backup_agent.list_backups(filesets=filesets)
         elif args.prune_old_backups:

@@ -258,12 +258,8 @@ class BackupAgent(object):
         """Print a list of existing backups."""
         baks_list = self.existing_backups(filesets=filesets or [])
         for blobname in baks_list:
-            #filename = Naming.blobname_to_filename(blobname)
-            parts = Naming.parse_blobname(blobname)
-            print "fs {fileset: <30} start {begin} ({type})".format(
-                fileset=parts[0],
-                begin=parts[2],
-                type=Naming.backup_type_str(parts[1]))
+            #parts = Naming.parse_blobname(blobname)
+            print blobname
 
     #
     # Prune methods.
@@ -316,7 +312,7 @@ class BackupAgent(object):
 
     def restore(self, restore_point, output_dir, filesets, stream=False):
         """ Restore backups."""
-        logging.info("Retriving point-in-time restore %s for filesets %s",
+        logging.info("Retrieving point-in-time restore %s for filesets %s",
                      restore_point, str(filesets))
         for fileset in filesets:
             self.restore_single_fileset(fileset=fileset,
@@ -324,31 +320,34 @@ class BackupAgent(object):
                                         restore_point=restore_point,
                                         stream=stream)
 
-    def restore_single_fileset(self, fileset, restore_point, output_dir, stream=False):
-        """ Restore backup for a single fileset."""
-        
-        blob_to_restore = Naming.construct_blobname(fileset, True, restore_point)
-        file_name = Naming.construct_filename(fileset, True, restore_point)
-        file_path = os.path.join(output_dir, file_name)
-        
+    def restore_blob(self, blobname, output_dir, stream=False):
+        """Restore backup given the full blob name."""
+        logging.info("Retrieving backup file %s", blobname)
+
+        file_path = os.path.join(output_dir, blobname)
         storage_client = self.backup_configuration.storage_client
 
         if stream:
             storage_client.get_blob_to_stream(
                 container_name=self.backup_configuration.azure_storage_container_name,
-                blob_name=blob_to_restore,
+                blob_name=blobname,
                 stream=sys.stdout,
                 max_connections=1
             )
         else:
             storage_client.get_blob_to_path(
                 container_name=self.backup_configuration.azure_storage_container_name,
-                blob_name=blob_to_restore,
+                blob_name=blobname,
                 file_path=file_path,
                 max_connections=1
             )
 
-        logging.debug("Downloaded dump %s", file_path)
+        logging.debug("Finished downloading %s", blobname)
+
+    def restore_single_fileset(self, fileset, restore_point, output_dir, stream=False):
+        """ Restore backup for a single fileset."""
+        blob_to_restore = Naming.construct_blobname(fileset, True, restore_point)
+        self.restore_blob(blob_to_restore, output_dir, stream)
 
     def list_restore_blobs(self, fileset):
         """Determine list of blobs needed to restore a backup."""
