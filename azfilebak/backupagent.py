@@ -59,14 +59,14 @@ class BackupAgent(object):
                 break
         return existing_blobs_dict
 
-    def existing_backups(self, filesets=None):
+    def existing_backups(self, filesets=None, container=None):
         """Retrieve list of existing backups."""
         existing_blobs_list = list()
         marker = None
 
         results = list(
             self.backup_configuration.storage_client.list_blobs(
-                container_name=self.backup_configuration.azure_storage_container_name,
+                container_name=container or self.backup_configuration.azure_storage_container_name,
                 marker=marker)
         )
 
@@ -260,9 +260,9 @@ class BackupAgent(object):
     # List methods.
     #
 
-    def list_backups(self, filesets=None):
+    def list_backups(self, filesets=None, container=None):
         """Print a list of existing backups."""
-        baks_list = self.existing_backups(filesets=filesets or [])
+        baks_list = self.existing_backups(filesets=filesets or [], container=container)
         for blobname in baks_list:
             #parts = Naming.parse_blobname(blobname)
             print blobname

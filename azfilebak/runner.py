@@ -67,6 +67,8 @@ class Runner(object):
 
         options.add_argument("-F", "--fileset", help="Select fileset(s) to backup or restore ('--fileset A,B,C')")
 
+        options.add_argument("-C", "--container", help="Override container name to use")
+
         options.add_argument("-s", "--stream",
                              help="Stream restore data to stdout",
                              action="store_true")
@@ -193,7 +195,7 @@ class Runner(object):
                     raise BackupException("Cannot stream more than one fileset")
                 backup_agent.restore(restore_point=args.restore, output_dir=output_dir, filesets=filesets, stream=args.stream)
         elif args.list_backups:
-            backup_agent.list_backups(filesets=filesets)
+            backup_agent.list_backups(filesets=filesets, container=args.container)
         elif args.prune_old_backups:
             age = ScheduleParser.parse_timedelta(args.prune_old_backups)
             backup_agent.prune_old_backups(older_than=age, filesets=filesets)

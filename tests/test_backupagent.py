@@ -173,6 +173,9 @@ class TestBackupAgent(LoggedTestCase):
         # and for no other fileset.
         self.agent.list_backups(['tmpdir'])
         self.agent.list_backups([])
+        # Also test overriding container name
+        container = self.cfg.azure_storage_container_name
+        self.agent.list_backups(['tmpdir'], container)
         # Non-existing fileset
         self.agent.list_backups(['XXX'])
         return True
