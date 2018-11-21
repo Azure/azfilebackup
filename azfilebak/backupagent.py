@@ -39,7 +39,10 @@ class BackupAgent(object):
         while True:
             results = self.backup_configuration.storage_client.list_blobs(
                 container_name=self.backup_configuration.azure_storage_container_name,
-                prefix=Naming.construct_blobname_prefix(fileset=fileset, is_full=is_full),
+                prefix=Naming.construct_blobname_prefix(
+                    fileset=fileset,
+                    is_full=is_full,
+                    vmname=self.backup_configuration.get_vm_name()),
                 marker=marker)
             for blob in results:
                 blob_name = blob.name
@@ -75,7 +78,7 @@ class BackupAgent(object):
             if parts is None:
                 continue
 
-            (fileset_of_existing_blob, _is_full, _start_timestamp) = parts
+            (fileset_of_existing_blob, _is_full, _start_timestamp, _vmname) = parts
 
             if not filesets or fileset_of_existing_blob in filesets:
                 existing_blobs_list.append(blob_name)
@@ -195,10 +198,12 @@ class BackupAgent(object):
 
         # Final destination container
         dest_container_name = self.backup_configuration.azure_storage_container_name
+        vmname = self.backup_configuration.get_vm_name()
         # Name of the backup blob
         blob_name = Naming.construct_blobname(fileset=fileset,
                                               is_full=is_full,
-                                              start_timestamp=start_timestamp)
+                                              start_timestamp=start_timestamp,
+                                              vmname=vmname)
 
         # Command to run to execute the backup
         if not command:
@@ -286,7 +291,7 @@ class BackupAgent(object):
                 if parts is None:
                     continue
 
-                (fileset, _is_full, start_timestamp) = parts
+                (fileset, _is_full, start_timestamp, vmname) = parts
                 if (fileset != None) and not fileset in filesets:
                     continue
 
@@ -346,7 +351,8 @@ class BackupAgent(object):
 
     def restore_single_fileset(self, fileset, restore_point, output_dir, stream=False):
         """ Restore backup for a single fileset."""
-        blob_to_restore = Naming.construct_blobname(fileset, True, restore_point)
+        vmname = self.backup_configuration.get_vm_name()
+        blob_to_restore = Naming.construct_blobname(fileset, True, restore_point, vmname)
         self.restore_blob(blob_to_restore, output_dir, stream)
 
     def list_restore_blobs(self, fileset):

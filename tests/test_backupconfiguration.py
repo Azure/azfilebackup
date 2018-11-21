@@ -51,19 +51,19 @@ class TestBackupConfiguration(LoggedTestCase):
 
     def test_get_backup_command(self):
         """test get_commandline"""
-        self.assertEqual(self.cfg.get_backup_command('tmp_dir'), 'tar cvzf - /tmp --ignore-failed-read')
+        self.assertEqual(self.cfg.get_backup_command('tmpdir'), 'tar cvzf - /tmp --ignore-failed-read')
         self.assertEqual(self.cfg.get_backup_command('osdisk'),
                          'tar cvzf - / --exclude /dev --exclude /proc --exclude /run --exclude /sys')
 
     def test_get_restore_command(self):
         """test get_commandline"""
-        self.assertEqual(self.cfg.get_restore_command('tmp_dir'), 'tar xvzf -')
+        self.assertEqual(self.cfg.get_restore_command('tmpdir'), 'tar xvzf -')
         self.assertEqual(self.cfg.get_restore_command('osdisk'), 'tar xvzf -')
 
     def test_get_filesets(self):
         """test get_filesets"""
         filesets = self.cfg.get_filesets()
-        self.assertIn('tmp_dir', filesets)
+        self.assertIn('tmpdir', filesets)
         self.assertIn('osdisk', filesets)
         self.assertIn('testecho', filesets)
 

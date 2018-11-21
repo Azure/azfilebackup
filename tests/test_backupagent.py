@@ -150,16 +150,16 @@ class TestBackupAgent(LoggedTestCase):
     def test_backup_single_fileset(self):
         """Test backup single fileset."""
         # Force a full backup
-        blob = self.agent.backup_single_fileset('tmp_dir', True, True)
+        blob = self.agent.backup_single_fileset('tmpdir', True, True)
         # Check the blob exists
         container = self.cfg.azure_storage_container_name
         self.assertTrue(self.cfg.storage_client.exists(container, blob))
 
     def test_existing_backups(self):
         """Test list of existing backups."""
-        # This test assumes that there are some existing backups for tmp_dir
+        # This test assumes that there are some existing backups for tmpdir
         # and for no other fileset.
-        backups_one = self.agent.existing_backups(['tmp_dir'])
+        backups_one = self.agent.existing_backups(['tmpdir'])
         self.assertGreater(len(backups_one), 0)
         backups_all = self.agent.existing_backups([])
         self.assertGreater(len(backups_all), 0)
@@ -169,9 +169,9 @@ class TestBackupAgent(LoggedTestCase):
 
     def test_list_backups(self):
         """Test list of existing backups."""
-        # This test assumes that there are some existing backups for tmp_dir
+        # This test assumes that there are some existing backups for tmpdir
         # and for no other fileset.
-        self.agent.list_backups(['tmp_dir'])
+        self.agent.list_backups(['tmpdir'])
         self.agent.list_backups([])
         # Non-existing fileset
         self.agent.list_backups(['XXX'])
@@ -180,9 +180,9 @@ class TestBackupAgent(LoggedTestCase):
     def test_restore_single_fileset(self):
         """Test restoring a single fileset."""
         # We should have a backup from the preceding test cases.
-        backups = self.agent.existing_backups_for_fileset('tmp_dir', True)
+        backups = self.agent.existing_backups_for_fileset('tmpdir', True)
         blob_name = backups.popitem()[1][0]
-        (fileset, _is_full, timestamp) = Naming.parse_blobname(blob_name)
+        (fileset, _is_full, timestamp, vmname) = Naming.parse_blobname(blob_name)
         self.agent.restore_single_fileset(fileset, timestamp, '/tmp')
         # TODO: test that expected files were indeed restored...
         return True
@@ -190,7 +190,7 @@ class TestBackupAgent(LoggedTestCase):
     def test_restore_blob(self):
         """Test restoring a blob."""
         # We should have a backup from the preceding test cases.
-        backups = self.agent.existing_backups_for_fileset('tmp_dir', True)
+        backups = self.agent.existing_backups_for_fileset('tmpdir', True)
         blob_name = backups.popitem()[1][0]
         self.agent.restore_blob(blob_name, '/tmp')
         # TODO: test that expected files were indeed restored...
@@ -200,7 +200,7 @@ class TestBackupAgent(LoggedTestCase):
         """Test prune_old_backups."""
         # Delete backups older than 7 days
         age = age = ScheduleParser.parse_timedelta('8d')
-        self.agent.prune_old_backups(age, ['tmp_dir'])
+        self.agent.prune_old_backups(age, ['tmpdir'])
         # TODO: test the backup was effectively deleted
         return True
 
