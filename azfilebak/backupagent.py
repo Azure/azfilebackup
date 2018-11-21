@@ -318,17 +318,24 @@ class BackupAgent(object):
 
     def restore(self, restore_point, output_dir, filesets, stream=False):
         """ Restore backups."""
-        logging.info("Retrieving point-in-time restore %s for filesets %s",
-                     restore_point, str(filesets))
-        for fileset in filesets:
-            self.restore_single_fileset(fileset=fileset,
-                                        output_dir=output_dir,
-                                        restore_point=restore_point,
-                                        stream=stream)
+        if not filesets:
+            logging.info("Retrieving point-in-time backup for default fileset")
+            self.restore_single_fileset(fileset='fs',
+                            output_dir=output_dir,
+                            restore_point=restore_point,
+                            stream=stream)
+        else:
+            logging.info("Retrieving point-in-time backup %s for filesets %s",
+                        restore_point, str(filesets))
+            for fileset in filesets:
+                self.restore_single_fileset(fileset=fileset,
+                                            output_dir=output_dir,
+                                            restore_point=restore_point,
+                                            stream=stream)
 
     def restore_blob(self, blobname, output_dir, stream=False):
         """Restore backup given the full blob name."""
-        logging.info("Retrieving backup file %s", blobname)
+        logging.info("Retrieving backup archive %s", blobname)
 
         file_path = os.path.join(output_dir, blobname)
         storage_client = self.backup_configuration.storage_client

@@ -215,6 +215,16 @@ class TestBackupAgent(LoggedTestCase):
         self.agent.backup_default(True, True)
         return True
 
+    def test_restore_default_fileset(self):
+        """Test restoring a single fileset."""
+        # We should have a backup from the preceding test cases.
+        backups = self.agent.existing_backups_for_fileset('fs', True)
+        blob_name = backups.popitem()[1][0]
+        (fileset, _is_full, timestamp, vmname) = Naming.parse_blobname(blob_name)
+        self.agent.restore(timestamp, '/tmp', [])
+        # TODO: test that expected files were indeed restored...
+        return True
+
     def test_get_notification_message(self):
         """Test get_notification_message."""
         json_str = self.agent.get_notification_message(True, "20180601_112429", True, 42, '/container/blob.tar.gz', None)
