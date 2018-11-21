@@ -172,7 +172,8 @@ class BackupAgent(object):
         # Assemble the tar command
         command = self.executable_connector.assemble_backup_command(sources, exclude)
         # Run it
-        self.backup_single_fileset(fs, is_full, force, command)
+        # Note: the default backup blob name always starts with 'fs'
+        self.backup_single_fileset('fs', is_full, force, command)
         return
 
     def backup_all_filesets(self, is_full, force):
