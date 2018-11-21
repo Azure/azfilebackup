@@ -67,7 +67,7 @@ class Runner(object):
 
         options.add_argument("-F", "--fileset", help="Select fileset(s) to backup or restore ('--fileset A,B,C')")
 
-        options.add_argument("-C", "--container", help="Override container name to use")
+        options.add_argument("-C", "--container", help="Override container name to use (for list and restore)")
 
         options.add_argument("-s", "--stream",
                              help="Stream restore data to stdout",
@@ -184,7 +184,11 @@ class Runner(object):
                 # Restore using blob name
                 if filesets:
                     logging.warn("Ignoring fileset (blob name provided)")
-                backup_agent.restore_blob(blobname=args.restore, output_dir=output_dir, stream=args.stream)
+                backup_agent.restore_blob(
+                    blobname=args.restore,
+                    output_dir=output_dir,
+                    stream=args.stream,
+                    container=args.container)
             else:
                 # Restore using fileset + timestamp
                 try:
@@ -193,7 +197,12 @@ class Runner(object):
                     raise BackupException("Cannot parse restore point \"{}\"".format(args.restore))
                 if len(filesets) > 1 and args.stream:
                     raise BackupException("Cannot stream more than one fileset")
-                backup_agent.restore(restore_point=args.restore, output_dir=output_dir, filesets=filesets, stream=args.stream)
+                backup_agent.restore(
+                    restore_point=args.restore,
+                    output_dir=output_dir,
+                    filesets=filesets,
+                    stream=args.stream,
+                    container=args.container)
         elif args.list_backups:
             backup_agent.list_backups(filesets=filesets, container=args.container)
         elif args.prune_old_backups:

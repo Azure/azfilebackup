@@ -219,12 +219,23 @@ class TestBackupAgent(LoggedTestCase):
         return True
 
     def test_restore_default_fileset(self):
-        """Test restoring a single fileset."""
+        """Test restoring the default fileset."""
         # We should have a backup from the preceding test cases.
         backups = self.agent.existing_backups_for_fileset('fs', True)
         blob_name = backups.popitem()[1][0]
         (fileset, _is_full, timestamp, vmname) = Naming.parse_blobname(blob_name)
         self.agent.restore(timestamp, '/tmp', [])
+        # TODO: test that expected files were indeed restored...
+        return True
+
+    def test_restore_default_fileset_override_container(self):
+        """Test restoring a single fileset and override the container name."""
+        # We should have a backup from the preceding test cases.
+        backups = self.agent.existing_backups_for_fileset('fs', True)
+        blob_name = backups.popitem()[1][0]
+        (fileset, _is_full, timestamp, vmname) = Naming.parse_blobname(blob_name)
+        container = self.cfg.azure_storage_container_name
+        self.agent.restore(timestamp, '/tmp', [], container=container)
         # TODO: test that expected files were indeed restored...
         return True
 

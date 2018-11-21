@@ -316,14 +316,15 @@ class BackupAgent(object):
     # Restore methods.
     #
 
-    def restore(self, restore_point, output_dir, filesets, stream=False):
+    def restore(self, restore_point, output_dir, filesets, stream=False, container=None):
         """ Restore backups."""
         if not filesets:
             logging.info("Retrieving point-in-time backup for default fileset")
             self.restore_single_fileset(fileset='fs',
                             output_dir=output_dir,
                             restore_point=restore_point,
-                            stream=stream)
+                            stream=stream,
+                            container=container)
         else:
             logging.info("Retrieving point-in-time backup %s for filesets %s",
                         restore_point, str(filesets))
@@ -331,9 +332,10 @@ class BackupAgent(object):
                 self.restore_single_fileset(fileset=fileset,
                                             output_dir=output_dir,
                                             restore_point=restore_point,
-                                            stream=stream)
+                                            stream=stream,
+                                            container=container)
 
-    def restore_blob(self, blobname, output_dir, stream=False):
+    def restore_blob(self, blobname, output_dir, stream=False, container=None):
         """Restore backup given the full blob name."""
         logging.info("Retrieving backup archive %s", blobname)
 
@@ -342,14 +344,14 @@ class BackupAgent(object):
 
         if stream:
             storage_client.get_blob_to_stream(
-                container_name=self.backup_configuration.azure_storage_container_name,
+                container_name=container or self.backup_configuration.azure_storage_container_name,
                 blob_name=blobname,
                 stream=sys.stdout,
                 max_connections=1
             )
         else:
             storage_client.get_blob_to_path(
-                container_name=self.backup_configuration.azure_storage_container_name,
+                container_name=container or self.backup_configuration.azure_storage_container_name,
                 blob_name=blobname,
                 file_path=file_path,
                 max_connections=1
@@ -357,11 +359,11 @@ class BackupAgent(object):
 
         logging.debug("Finished downloading %s", blobname)
 
-    def restore_single_fileset(self, fileset, restore_point, output_dir, stream=False):
+    def restore_single_fileset(self, fileset, restore_point, output_dir, stream=False, container=None):
         """ Restore backup for a single fileset."""
         vmname = self.backup_configuration.get_vm_name()
         blob_to_restore = Naming.construct_blobname(fileset, True, restore_point, vmname)
-        self.restore_blob(blob_to_restore, output_dir, stream)
+        self.restore_blob(blob_to_restore, output_dir, stream, container)
 
     def list_restore_blobs(self, fileset):
         """Determine list of blobs needed to restore a backup."""
