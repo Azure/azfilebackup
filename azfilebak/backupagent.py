@@ -452,6 +452,13 @@ class BackupAgent(object):
             is_full, start_timestamp, success,
             blob_size, blob_path, error_msg)
         cmd = self.backup_configuration.get_notification_command()
-        proc = subprocess.Popen(shlex.split(cmd), stdin=subprocess.PIPE)
-        proc.communicate(json_str)
+        try:
+            proc = subprocess.Popen(shlex.split(cmd), stdin=subprocess.PIPE)
+            proc.communicate(json_str)
+        except OSError as ex:
+            # Silently ignore error if notification command does not exist
+            if ex.errno == os.errno.ENOENT:
+                logging.debug("Notification command %s not found", shlex.split(cmd)[0])
+            else:
+                raise
         return
