@@ -60,7 +60,7 @@ class BackupAgent(object):
         return existing_blobs_dict
 
     def existing_backups(self, filesets=None, container=None):
-        """Retrieve list of existing backups."""
+        """Retrieve list of existing backups. Returns tuples (name, datetime, length)"""
         existing_blobs_list = list()
         marker = None
 
@@ -81,7 +81,7 @@ class BackupAgent(object):
             (fileset_of_existing_blob, _is_full, _start_timestamp, _vmname) = parts
 
             if not filesets or fileset_of_existing_blob in filesets:
-                existing_blobs_list.append(blob_name)
+                existing_blobs_list.append((blob_name, blob.properties.creation_time,blob.properties.content_length))
 
         return existing_blobs_list
 
@@ -263,9 +263,9 @@ class BackupAgent(object):
     def list_backups(self, filesets=None, container=None):
         """Print a list of existing backups."""
         baks_list = self.existing_backups(filesets=filesets or [], container=container)
-        for blobname in baks_list:
+        for (blobname, date, length) in baks_list:
             #parts = Naming.parse_blobname(blobname)
-            print blobname
+            print '{0} {1:12} {2}'.format(date, length, blobname)
 
     #
     # Prune methods.
