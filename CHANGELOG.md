@@ -1,6 +1,47 @@
 # CHANGELOG
 
-## (Unreleased - v1.0-alpha2)
+## v1.0-beta1
+
+This release contains some fixes as well as the changes below.
+
+### Change to backup blob name format
+
+The backup blobs (archives) are now saved using the following name format:
+
+```
+fs_test-backup_full_20181121_164327.tar.gz
+```
+
+Which is, `*fileset*_*vmname*_*timestamp*.tar.gz`. The default fileset name is `fs`.
+
+### Display archive size and readable date in listing
+
+The `--list` command will now display the full blob name, its size in bytes and its creation date in human readable format.
+
+```
+# azfilebak --list
+2018-11-21 16:46:24+00:00    512754746 fs_test-backup_full_20181121_164327.tar.gz
+2018-11-22 09:42:00+00:00    512782875 fs_test-backup_full_20181122_094011.tar.gz
+```
+
+### Restore archive using blob name
+
+The `--restore` command now accepts the full blob name (also works with the `--stream` option):
+
+```
+# azfilebak --restore fs_test-backup_full_20181122_094011.tar.gz
+```
+
+### Override container name
+
+All backup files are saved in a container bearing the same name as the virtual machine the tool runs on. When listing or restoring archive files, it is now possible to override this container name, so that archives from another machine can be listed and restored.
+
+```
+# azfilebak --list --container hec99v106014
+# azfilebak --restore tmpdir_hec99v106014_full_20181122_110732.tar.gz --container hec99v106014
+```
+
+## v1.0-alpha2
 
 ### Release process
 
