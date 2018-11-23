@@ -4,11 +4,11 @@
 
 This Python-based tool uses `tar` to perform backups of a file system and upload the archive to Azure Blob Storage. In most cases, you should first evaluate [Azure Backup](https://azure.microsoft.com/en-us/services/backup/) which is a fully-managed backup service for virtual machines running both in Azure and on-premises. If for any reason Azure Backup is not applicable in your environment, this tool might be useful to you.
 
-## Current status: **alpha**
+## Current status: **beta**
 
 ## Features and limitations
 
-This tool requires Python 2.7 and should work on any Linux distribution. It was extensively tested on SUSE Enterprise Linux 12.
+This tool requires Python 2.7 and should work on any Linux distribution. It was tested on SUSE Enterprise Linux 12.
 
 Features:
 
@@ -19,9 +19,9 @@ Features:
 - Storage container to use is determined by configuration file
 - Backup schedule is defined using instance tags
 
-Limitations:
+Requirements:
 
-- Azure virtual machine: this tool is designed to run on an Azure virtual machine. It uses the Azure environment, like tags in the instance metadata, to determine how it should run.
+- Azure Virtual Machine: this tool is designed to run on an Azure virtual machine. It uses the Azure environment, like [tags](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-using-tags) in the [instance metadata](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service), to determine how it should run. This allows you to control most of the behaviour of the tool through environment changes, instead of having to log on to the virtual machine to edit a configuration file.
 
 - Azure Blob Storage: this tool is designed to upload the backup archives to an Azure Blob Storage account. It uses [managed identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) for authentication, which means that storage credentials don't need to be saved on the machine.
 
@@ -46,13 +46,13 @@ source ~/azfilebak/bin/activate
 You can install directly from a release URL:
 
 ```
-pip install https://github.com/Azure/azfilebackup/releases/download/v1.0-alpha1/azfilebak-1.0a1.tar.gz
+pip install https://github.com/Azure/azfilebackup/releases/download/v1.0-alpha1/azfilebak-1.0b1.tar.gz
 ```
 
 Or if you downloaded the distribution archive locally:
 
 ```
-pip install dist/azfilebak-0.0.1.tar.gz
+pip install azfilebak-1.0b1.tar.gz
 ```
 
 ## Configuration
@@ -67,10 +67,34 @@ Tags are used to govern the backup schedule and configure certain parameters. Th
 
 ## Usage
 
+If the backup configuration file is not in the default location (`/usr/sap/backup/backup.conf`), use `-c` to specify an alternate location:
+
+```
+sudo azfilebak -c ./test_backup.conf -x
+```
+
 Run a full backup now, disregarding the schedule constraints:
 
 ```
-sudo $HOME/azfilebak/bin/azfilebak --full --force
+sudo azfilebak --full --force
+```
+
+List existing backups:
+
+```
+sudo azfilebak --list
+```
+
+Download a backup archive (it will be saved to `/tmp` by default):
+
+```
+azfilebak --restore fs_test-backup_full_20181122_094011.tar.gz
+```
+
+Stream the contents of the archive to a local `tar` command, so you can dreictly list or extract files:
+
+```
+azfilebak --restore fs_test-backup_full_20181122_094011.tar.gz --stream | tar tvzf -
 ```
 
 ## Development
@@ -102,6 +126,8 @@ The storage account key can be specified via an environment variable:
 ```
 export STORAGE_KEY='xxx'
 ```
+
+The tool requires the GNU version of the `tar` command. If you are developing and running the tests in a non-GNU environment (e.g. macOS), you can install GNU `tar`. On macOS for example, you can use Homebrew: `brew install gnu-tar`.
 
 ## Contributing
 
