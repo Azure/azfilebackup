@@ -6,7 +6,7 @@
 # Licensed under the MIT License.
 # --------------------------------------------------------------------------
 
-__version__ = '1.0-beta1'
+__version__ = '1.0-beta2'
 
 def version():
     return __version__
