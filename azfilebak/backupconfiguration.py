@@ -170,7 +170,7 @@ class BackupConfiguration(object):
         information.
         """
         try:
-            account = self.instance_metadata.get_tags()['bkp_storage_account']
+            account = self.instance_metadata_tag_value('bkp_storage_account')
             logging.debug("Using storage account name from instance metadata: %s", account)
         except BackupException:
             cid = self.cfg_file_value("DEFAULT.CID").lower()
