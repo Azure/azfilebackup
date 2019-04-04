@@ -424,7 +424,7 @@ class BackupAgent(object):
             "cloud" :"azure",
             "hostname": self.backup_configuration.get_vm_name(),
             "instance-id": self.backup_configuration.get_system_uuid(),
-            "state": {True: "success", False:" fail"}[success],
+            "state": {True: "success", False:"fail"}[success],
             "type": "fs",
             "method": "file",
             "level": {True: "full", False: "incr"}[is_full],
