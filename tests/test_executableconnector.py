@@ -41,27 +41,27 @@ class TestExecutableConnector(LoggedTestCase):
         if is_docker:
             # We are in the matrix
             cmd = self.connector.assemble_backup_command('/', '/dev')
-            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /dev --exclude /run --exclude /sys --exclude /proc --exclude /proc/bus --exclude /proc/fs --exclude /proc/irq --exclude /proc/sys --exclude /proc/sysrq-trigger /')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --sparse --exclude /dev --exclude /run --exclude /sys --exclude /mnt/resource --exclude /proc --exclude /proc/bus --exclude /proc/fs --exclude /proc/irq --exclude /proc/sys --exclude /proc/sysrq-trigger /')
             cmd = self.connector.assemble_backup_command('/', '/proc,/dev')
-            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /proc --exclude /dev --exclude /run --exclude /sys --exclude /proc --exclude /proc/bus --exclude /proc/fs --exclude /proc/irq --exclude /proc/sys --exclude /proc/sysrq-trigger /')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --sparse --exclude /proc --exclude /dev --exclude /run --exclude /sys --exclude /mnt/resource --exclude /proc --exclude /proc/bus --exclude /proc/fs --exclude /proc/irq --exclude /proc/sys --exclude /proc/sysrq-trigger /')
             cmd = self.connector.assemble_backup_command('/', '/foo,/bar')
-            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /foo --exclude /bar --exclude /dev --exclude /run --exclude /sys --exclude /proc --exclude /proc/bus --exclude /proc/fs --exclude /proc/irq --exclude /proc/sys --exclude /proc/sysrq-trigger /')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --sparse --exclude /foo --exclude /bar --exclude /dev --exclude /run --exclude /sys --exclude /mnt/resource --exclude /proc --exclude /proc/bus --exclude /proc/fs --exclude /proc/irq --exclude /proc/sys --exclude /proc/sysrq-trigger /')
         elif is_darwin:
             # We are on a Mac dev machine
             cmd = self.connector.assemble_backup_command('/', '/dev')
-            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /dev --exclude /run --exclude /sys /')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --sparse --exclude /dev --exclude /run --exclude /sys --exclude /mnt/resource /')
             cmd = self.connector.assemble_backup_command('/', '/proc,/dev')
-            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /proc --exclude /dev --exclude /run --exclude /sys /')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --sparse --exclude /proc --exclude /dev --exclude /run --exclude /sys --exclude /mnt/resource /')
             cmd = self.connector.assemble_backup_command('/', '/foo,/bar')
-            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /foo --exclude /bar --exclude /dev --exclude /run --exclude /sys /')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --sparse --exclude /foo --exclude /bar --exclude /dev --exclude /run --exclude /sys --exclude /mnt/resource /')
         elif is_linux:
             # We are on a generic Linux machine, e.g. VSTS build agent
             cmd = self.connector.assemble_backup_command('/', '/dev')
-            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /dev --exclude /run --exclude /sys --exclude /proc /')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --sparse --exclude /dev --exclude /run --exclude /sys --exclude /mnt/resource --exclude /proc /')
             cmd = self.connector.assemble_backup_command('/', '/proc,/dev')
-            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /proc --exclude /dev --exclude /run --exclude /sys --exclude /proc /')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --sparse --exclude /proc --exclude /dev --exclude /run --exclude /sys --exclude /mnt/resource --exclude /proc /')
             cmd = self.connector.assemble_backup_command('/', '/foo,/bar')
-            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --exclude /foo --exclude /bar --exclude /dev --exclude /run --exclude /sys --exclude /proc /')
+            self.assertEquals(cmd, 'tar cpzf - --hard-dereference --sparse --exclude /foo --exclude /bar --exclude /dev --exclude /run --exclude /sys --exclude /mnt/resource --exclude /proc /')
 
 if __name__ == '__main__':
     unittest.main()

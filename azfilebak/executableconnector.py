@@ -24,20 +24,23 @@ class ExecutableConnector(object):
         """Assemble backup command line from configuration."""
 
         # Base command
-        cmd = 'tar cpzf - --hard-dereference'
+        cmd = 'tar cpzf - --hard-dereference --sparse'
 
         # Add explicit excludes
         excludes = exclude.split(',')
         for i in excludes:
             cmd += ' --exclude ' + i
 
-        # Exclude /dev, /proc, /run, /sys
+        # Exclude /dev, /run, /sys
+        # Also exclude /mnt/resource which is a volatile file system on Azure VMs
         if '/dev' not in excludes:
             cmd += ' --exclude /dev'
         if '/run' not in excludes:
             cmd += ' --exclude /run'
         if '/sys' not in excludes:
             cmd += ' --exclude /sys'
+        if '/mnt/resource' not in excludes:
+            cmd += ' --exclude /mnt/resource'
 
         # Exclude any mount point of type 'proc'
         mounts = psutil.disk_partitions(True)
