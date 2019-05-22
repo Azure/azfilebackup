@@ -58,8 +58,7 @@ class ExecutableConnector(object):
 
         proc = subprocess.Popen(
             args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE
         )
 
         return proc
