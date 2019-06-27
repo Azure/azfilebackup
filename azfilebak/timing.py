@@ -9,6 +9,8 @@
 
 import time
 import datetime
+import pytz
+import tzlocal
 
 class Timing(object):
     """Timing class."""
@@ -32,6 +34,19 @@ class Timing(object):
         t2 = Timing.parse(str2)
         dt2 = datetime.datetime(year=t2.tm_year, month=t2.tm_mon, day=t2.tm_mday, hour=t2.tm_hour, minute=t2.tm_min, second=t2.tm_sec)
         return dt2 - dt1
+
+    @staticmethod
+    def local_string_to_utc_epoch(time_str):
+        """Converts a local time string to UTC epoch"""
+        t = Timing.parse(time_str)
+        dt = datetime.datetime(year=t.tm_year, month=t.tm_mon, day=t.tm_mday,
+                               hour=t.tm_hour, minute=t.tm_min, second=t.tm_sec)
+
+        timezone_loc = tzlocal.get_localzone()
+        timezone_utc = pytz.timezone("UTC")
+        dt_utc = timezone_loc.localize(dt).astimezone(timezone_utc)
+
+        return int((dt_utc - datetime.datetime(1970, 1, 1, tzinfo=timezone_utc)).total_seconds())
 
     @staticmethod
     def sort(times, selector=lambda x: x):

@@ -6,13 +6,13 @@
 from setuptools import setup
 
 setup(
-    name = 'azfilebak',
-    version = '1.0-beta3',
-    packages = ['azfilebak'],
+    name='azfilebak',
+    version='1.0-beta4',
+    packages=['azfilebak'],
     description="A backup utility for file systems into Azure blob storage",
     author="Microsoft Corporation",
     author_email='opensource@microsoft.com',
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'azfilebak = azfilebak.__main__:main'
         ]
@@ -22,6 +22,8 @@ setup(
         'azure-storage-common>=1.3.0',
         'azure-storage-blob>=1.3.0',
         'msrestazure>=0.4.14',
+        'pytz>=2019.1',
+        'tzlocal>=1.5.1',
         'psutil'
     ],
     tests_require=[
