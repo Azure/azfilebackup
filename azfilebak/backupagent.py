@@ -10,7 +10,6 @@ import logging
 import os
 import datetime
 import json
-import time
 import subprocess
 import shlex
 
@@ -191,6 +190,7 @@ class BackupAgent(object):
 
         # Determine if backup can run according to schedule
         start_timestamp = Timing.now_localtime()
+        end_timestamp = None
         if not self.should_run_backup(
                 fileset=fileset, is_full=is_full,
                 force=force, start_timestamp=start_timestamp):
@@ -231,27 +231,43 @@ class BackupAgent(object):
         except Exception as ex:
             logging.error("Failed to stream blob: %s", ex.message)
             self.send_notification(
-                is_full, start_timestamp, False,
-                0, '/' + dest_container_name + '/' + blob_name, ex.message)
+                is_full=is_full,
+                start_timestamp=start_timestamp,
+                end_timestamp=end_timestamp,
+                success=False,
+                blob_size=0,
+                blob_path='/' + dest_container_name + '/' + blob_name,
+                error_msg=ex.message)
             raise ex
 
         logging.info("Finished streaming blob: %s", blob_name)
+        end_timestamp = Timing.now_localtime()
 
         # Get blob size
         try:
             blob_props = storage_client.get_blob_properties(dest_container_name, blob_name)
         except Exception as ex:
             logging.error("Failed to get blob size: %s", ex.message)
+
             self.send_notification(
-                is_full, start_timestamp, False,
-                0, '/' + dest_container_name + '/' + blob_name, ex.message)
+                is_full=is_full,
+                start_timestamp=start_timestamp,
+                end_timestamp=end_timestamp,
+                success=False,
+                blob_size=0,
+                blob_path='/' + dest_container_name + '/' + blob_name,
+                error_msg=ex.message)
             raise ex
 
         # Send notification
         self.send_notification(
-            is_full, start_timestamp, True,
-            blob_props.properties.content_length,
-            '/' + dest_container_name + '/' + blob_name, None)
+            is_full=is_full,
+            start_timestamp=start_timestamp,
+            end_timestamp=end_timestamp,
+            success=True,
+            blob_size=blob_props.properties.content_length,
+            blob_path='/' + dest_container_name + '/' + blob_name,
+            error_msg=None)
 
         # Return name of new blob
         return blob_name
@@ -292,7 +308,7 @@ class BackupAgent(object):
                 if parts is None:
                     continue
 
-                (fileset, _is_full, start_timestamp, vmname) = parts
+                (fileset, _is_full, start_timestamp, _vmname) = parts
                 if (fileset != None) and not fileset in filesets:
                     continue
 
@@ -418,7 +434,7 @@ class BackupAgent(object):
     # Integration commands. (e.g. TIC)
     #
 
-    def get_notification_message(self, is_full, start_timestamp, success, blob_size, blob_path, error_msg):
+    def get_notification_message(self, is_full, start_timestamp, end_timestamp, success, blob_size, blob_path, error_msg):
         """Assemble JSON message for notification."""
         data = {
             "cloud" :"azure",
@@ -435,10 +451,10 @@ class BackupAgent(object):
             "database-id": "",
             "s3-path": self.backup_configuration.get_azure_storage_account_name() +
                        '.blob.core.windows.net' + blob_path,
-            "timestamp-send": int(time.mktime(time.localtime())),
-            "timestamp-last-successful": int(time.mktime(Timing.parse(start_timestamp))),
-            "timestamp-bkp-begin": "",
-            "timestamp-bkp-end": int(time.mktime(Timing.parse(start_timestamp))),
+            "timestamp-send": Timing.local_string_to_utc_epoch(Timing.now_localtime()),
+            "timestamp-last-successful": Timing.local_string_to_utc_epoch(start_timestamp),
+            "timestamp-bkp-begin": Timing.local_string_to_utc_epoch(start_timestamp),
+            "timestamp-bkp-end": Timing.local_string_to_utc_epoch(end_timestamp),
             "backup-size": blob_size,
             "dbtype": "",
             "error-message": error_msg or '',
@@ -446,10 +462,10 @@ class BackupAgent(object):
         }
         return json.dumps(data)
 
-    def send_notification(self, is_full, start_timestamp, success, blob_size, blob_path, error_msg=None):
+    def send_notification(self, is_full, start_timestamp, end_timestamp, success, blob_size, blob_path, error_msg=None):
         """Send a notification to TIC."""
         json_str = self.get_notification_message(
-            is_full, start_timestamp, success,
+            is_full, start_timestamp, end_timestamp, success,
             blob_size, blob_path, error_msg)
         cmd = self.backup_configuration.get_notification_command()
         try:

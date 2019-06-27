@@ -241,7 +241,7 @@ class TestBackupAgent(LoggedTestCase):
 
     def test_get_notification_message(self):
         """Test get_notification_message."""
-        json_str = self.agent.get_notification_message(True, "20180601_112429", True, 42, '/container/blob.tar.gz', None)
+        json_str = self.agent.get_notification_message(True, "20180601_112429", "20180601_112430", True, 42, '/container/blob.tar.gz', None)
         obj = json.loads(json_str)
         self.assertEqual(obj["system-id"], "AZ3")
         self.assertEqual(obj["hostname"], "hec99v106014")
