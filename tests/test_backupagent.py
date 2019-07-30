@@ -15,6 +15,7 @@ from azfilebak.businesshours import BusinessHours
 from azfilebak.scheduleparser import ScheduleParser
 from azfilebak.naming import Naming
 from tests.loggedtestcase import LoggedTestCase
+from azfilebak.backupexception import BackupException
 
 class TestBackupAgent(LoggedTestCase):
     """Unit tests for class BackupAgent."""
@@ -154,6 +155,10 @@ class TestBackupAgent(LoggedTestCase):
         # Check the blob exists
         container = self.cfg.azure_storage_container_name
         self.assertTrue(self.cfg.storage_client.exists(container, blob))
+
+    def test_backup_single_fileset_tar_fail(self):
+        """Test backup single fileset + tar failure."""
+        self.assertRaises(BackupException, self.agent.backup_single_fileset, 'tarfail', True, True)
 
     def test_existing_backups(self):
         """Test list of existing backups."""

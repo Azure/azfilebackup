@@ -17,6 +17,7 @@ import azfilebak
 from azfilebak.naming import Naming
 from azfilebak.timing import Timing
 from azfilebak.executableconnector import ExecutableConnector
+from azfilebak.backupexception import BackupException
 
 class BackupAgent(object):
     """
@@ -227,9 +228,15 @@ class BackupAgent(object):
                 use_byte_buffer=True, max_connections=1)
 
             # Wait for the command to terminate
-            proc.wait()
+            retcode = proc.wait()
+
+            # Check return code
+            if retcode != 0:
+                raise BackupException("tar command failed with return code {}".format(retcode))
+
         except Exception as ex:
             logging.error("Failed to stream blob: %s", ex.message)
+            end_timestamp = Timing.now_localtime()
             self.send_notification(
                 is_full=is_full,
                 start_timestamp=start_timestamp,

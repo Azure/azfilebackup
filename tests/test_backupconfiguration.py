@@ -71,7 +71,7 @@ class TestBackupConfiguration(LoggedTestCase):
         """test get_fileset_sources"""
         self.assertEqual(self.cfg.get_fileset_sources('ci'), '/tmp')
         self.assertEqual(self.cfg.get_fileset_sources('hana'), '/tmp')
-        self.assertEqual(self.cfg.get_fileset_sources('ase'), '/tmp')
+        self.assertEqual(self.cfg.get_fileset_sources('ase'), '/bin')
 
     def test_get_fileset_exclude(self):
         """test get_fileset_sources"""
