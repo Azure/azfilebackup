@@ -231,7 +231,10 @@ class BackupAgent(object):
             retcode = proc.wait()
 
             # Check return code
-            if retcode != 0:
+            # Ignore return code 1 (files changed during backup)
+            if retcode == 1:
+                logging.warning("ignoring tar command return code 1")
+            elif retcode != 0:
                 raise BackupException("tar command failed with return code {}".format(retcode))
 
         except Exception as ex:
