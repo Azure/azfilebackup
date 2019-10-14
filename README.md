@@ -129,6 +129,10 @@ export STORAGE_KEY='xxx'
 
 The tool requires the GNU version of the `tar` command. If you are developing and running the tests in a non-GNU environment (e.g. macOS), you can install GNU `tar`. On macOS for example, you can use Homebrew: `brew install gnu-tar`.
 
+## Packaging
+
+The `release` directory contains instructions and a Dockerfile that are used to generate an RPM file suitabled for deployment on a system without impact on existing Python installations.
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
