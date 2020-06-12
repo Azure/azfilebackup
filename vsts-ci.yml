@@ -20,6 +20,8 @@ steps:
 
   - script: python setup.py test
     displayName: 'Run tests'
+    env:
+      STORAGE_KEY: $(STORAGE_KEY)
 
   - script: 'python setup.py sdist'
     displayName: 'Build sdist'

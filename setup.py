@@ -20,12 +20,12 @@ setup(
     install_requires=[
         'pid>=2.2.0',
         'azure-storage-common>=1.3.0',
-        'azure-storage-blob>=1.3.0',
+        'azure-storage-blob>=1.3.0,<=2.0.1',
         'msrestazure>=0.4.14',
         'pytz>=2019.1',
         'tzlocal>=1.5.1',
-        'psutil'
+        'psutil>=5.6.6'
     ],
     tests_require=[
-        'mock'
+        'mock<4.0.0'
     ])
