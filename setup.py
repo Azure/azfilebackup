@@ -7,7 +7,7 @@ from setuptools import setup
 
 setup(
     name='azfilebak',
-    version='1.0-beta6',
+    version='1.0-beta7',
     packages=['azfilebak'],
     description="A backup utility for file systems into Azure blob storage",
     author="Microsoft Corporation",
