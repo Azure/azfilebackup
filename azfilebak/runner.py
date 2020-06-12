@@ -81,6 +81,9 @@ class Runner(object):
                              help="display debug messages",
                              action="store_true")
 
+        options.add_argument("-R", "--rate-limit",
+                             help="Limits the rate the backup is written/read [value in MB/s]")
+
         return parser
 
     @staticmethod
@@ -169,6 +172,7 @@ class Runner(object):
         filesets = Runner.get_filesets(args)
 
         force = args.force
+        rate = args.rate_limit
 
         for line in backup_agent.get_configuration_printable(output_dir=output_dir):
             logging.debug(line)
@@ -176,7 +180,7 @@ class Runner(object):
         if args.full_backup:
             try:
                 with pid.PidFile(pidname='fileset-backup-full') as _p:
-                    backup_agent.backup(filesets=filesets, is_full=args.full_backup, force=force)
+                    backup_agent.backup(filesets=filesets, is_full=args.full_backup, force=force, rate=rate)
             except pid.PidFileAlreadyLockedError:
                 logging.warn("Skip full backup, already running")
         elif args.restore:

@@ -152,17 +152,17 @@ class BackupAgent(object):
     # Backup methods.
     #
 
-    def backup(self, filesets, is_full, force):
+    def backup(self, filesets, is_full, force, rate=None):
         """Backup a list of filesets."""
         filesets_to_backup = filesets
         if not filesets_to_backup:
             # If not fileset specified, determine the default backup configuration
-            self.backup_default(is_full, force)
+            self.backup_default(is_full, force, rate)
         else:
             for fileset in filesets_to_backup:
-                self.backup_single_fileset(fileset=fileset, is_full=is_full, force=force)
+                self.backup_single_fileset(fileset=fileset, is_full=is_full, force=force, rate=rate)
 
-    def backup_default(self, is_full, force):
+    def backup_default(self, is_full, force, rate=None):
         """Determine default backup configuration."""
         fs = self.backup_configuration.get_default_fileset()
         logging.info("Backup request for default fileset: %s", fs)
@@ -173,7 +173,7 @@ class BackupAgent(object):
         command = self.executable_connector.assemble_backup_command(sources, exclude)
         # Run it
         # Note: the default backup blob name always starts with 'fs'
-        self.backup_single_fileset('fs', is_full, force, command)
+        self.backup_single_fileset('fs', is_full, force, command, rate)
         return
 
     def backup_all_filesets(self, is_full, force):
@@ -182,7 +182,7 @@ class BackupAgent(object):
         for fileset in filesets_to_backup:
             self.backup_single_fileset(fileset=fileset, is_full=is_full, force=force)
 
-    def backup_single_fileset(self, fileset, is_full, force, command=None):
+    def backup_single_fileset(self, fileset, is_full, force, command=None, rate=None):
         """
         Backup a single fileset using the specified command.
         If no command is provided, it will be looked up in the config file.
@@ -214,7 +214,7 @@ class BackupAgent(object):
         try:
             # Run the backup command
             proc = self.executable_connector.run_backup_command(
-                command)
+                command, rate)
 
             logging.info(
                 "Streaming backup to blob: %s in container: %s",
