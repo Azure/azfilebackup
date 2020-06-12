@@ -24,7 +24,7 @@ setup(
         'msrestazure>=0.4.14',
         'pytz>=2019.1',
         'tzlocal>=1.5.1',
-        'psutil'
+        'psutil>=5.6.6'
     ],
     tests_require=[
         'mock<4.0.0'
