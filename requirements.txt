@@ -8,7 +8,7 @@ azure-storage-nspkg==3.1.0
 certifi==2020.4.5.2
 cffi==1.14.0
 chardet==3.0.4
-cryptography==2.9.2
+cryptography==3.2
 enum34==1.1.10
 futures==3.3.0
 idna==2.9
